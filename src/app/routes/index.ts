@@ -4,8 +4,7 @@ import authrouter from "../modules/auth/auth.routes";
 import schoolRouter from "../modules/school/school.routes";
 import attendanceRoutes from "../modules/Attendance/attendance.routes";
 import contactInfoRouter from "../modules/contactinfo/contactInfo.routes";
-
-
+import upazilaRouter from "../modules/upazila/upazila.routes";
 
 const router = Router();
 
@@ -17,6 +16,10 @@ const moduleRoutes = [
   {
     path: "/auth",
     route: authrouter,
+  },
+  {
+    path: "/upazila",
+    route: upazilaRouter,
   },
   {
     path: "/school",

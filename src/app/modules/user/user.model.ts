@@ -10,9 +10,10 @@ const UserSchema = new Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },
+    accessUpazila: { type: String, required: false },
     role: {
       type: String,
-      enum: ["admin", "hr"],
+      enum: ["sa", "admin", "mo", "bm"], // sa= super admin, admin, mo= monitoring Officer, bm = branch Manager
     },
     isBlocked: { type: Boolean, default: false },
   },
