@@ -1,10 +1,8 @@
+import { ObjectId } from "mongoose";
+
 interface IAddress {
-  
   union: string;
-  upazila: string;
   district: string;
-  division: string
-  
 }
 
 export interface ISchool extends Document {
@@ -16,6 +14,7 @@ export interface ISchool extends Document {
   totalTeacher: number;
   totalStudent: number;
   address: IAddress;
+  defaultItems: number;
   showDetails: string;
 }
 

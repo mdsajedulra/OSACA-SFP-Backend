@@ -13,7 +13,7 @@ const UserSchema = new Schema(
     accessUpazila: { type: String, required: false },
     role: {
       type: String,
-      enum: ["sa", "admin", "mo", "bm"], // sa= super admin, admin, mo= monitoring Officer, bm = branch Manager
+      enum: ["admin", "upazilaManager", "teacher"], // sa= super admin, admin, mo= monitoring Officer, bm = branch Manager
     },
     isBlocked: { type: Boolean, default: false },
   },

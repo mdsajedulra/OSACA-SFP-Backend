@@ -5,6 +5,7 @@ import schoolRouter from "../modules/school/school.routes";
 import attendanceRoutes from "../modules/Attendance/attendance.routes";
 import contactInfoRouter from "../modules/contactinfo/contactInfo.routes";
 import upazilaRouter from "../modules/upazila/upazila.routes";
+import distributionRouter from "../modules/foodDistributions/distribution.routes";
 
 const router = Router();
 
@@ -26,8 +27,8 @@ const moduleRoutes = [
     route: schoolRouter,
   },
   {
-    path: "/attendance",
-    route: attendanceRoutes,
+    path: "/distribution",
+    route: distributionRouter,
   },
   {
     path: "/contactinfo",
