@@ -10,7 +10,7 @@ const UserSchema = new Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },
-    accessUpazila: { type: String, required: false },
+    accessUpazila: { type: Schema.Types.ObjectId, required: false, ref: "Upazila" },
     role: {
       type: String,
       enum: ["admin", "upazilaManager", "teacher"], // sa= super admin, admin, mo= monitoring Officer, bm = branch Manager

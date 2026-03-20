@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { ObjectId, Schema } from "mongoose";
 
 export type Role = "admin" | "upazilaManager" | "teacher";
 
@@ -20,7 +20,7 @@ export interface IFoodDistribution {
   uuid: string; // unique
 
   schoolId: ObjectId;
-  upazilaId: ObjectId;
+  upazilaId: Schema.Types.ObjectId;
 
   date: Date;
   days: number;

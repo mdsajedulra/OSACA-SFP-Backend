@@ -34,6 +34,10 @@ const moduleRoutes = [
     path: "/contactinfo",
     route: contactInfoRouter,
   },
+  {
+    path: "/attendance",
+    route: attendanceRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

@@ -5,9 +5,10 @@ import catchAsync from '../utils/catchAsync';
 import { User } from '../modules/user/user.model';
 
 const auth = (...requiredRole: string[]) =>
+
   catchAsync(async (req, res, next) => {
     const authorization = req.headers.authorization as string;
-    // console.log(authorization?.split(" "));
+    console.log(authorization?.split(" "));
     if (!authorization) {
       throw new Error('Authorization Required');
     }

@@ -2,28 +2,31 @@ import { ObjectId } from "mongodb";
 import schoolModel from "../school/school.model";
 import { IFoodDistribution } from "./distribution.interface";
 import { FoodDistribution } from "./distribution.model";
+import { User } from "../user/user.model";
+import mongoose, { get } from "mongoose";
+import moment from "moment-timezone";
 
 
 // create distribution service function 
 
 
-const createDistribution = async (payload: IFoodDistribution) =>{
+const createDistribution = async (payload: IFoodDistribution) => {
 
 
     const school = await schoolModel.findById(payload.schoolId);
 
-    if(!school){
+    if (!school) {
         throw new Error("School not found");
     }
 
-const existingDistribution = await FoodDistribution.findOne({
-    schoolId: payload.schoolId,
-    date: payload.date,
-});
+    const existingDistribution = await FoodDistribution.findOne({
+        schoolId: payload.schoolId,
+        date: payload.date,
+    });
 
-if(existingDistribution){
-    throw new Error("Distribution for this school and date already exists");
-}
+    if (existingDistribution) {
+        throw new Error("Distribution for this school and date already exists");
+    }
     const distribution = await FoodDistribution.create(payload);
     return distribution;
 
@@ -31,19 +34,19 @@ if(existingDistribution){
 
 // get all distribution
 
-const getAllDistributions = async () =>{
+const getAllDistributions = async () => {
     const distributions = await FoodDistribution.find();
     return distributions;
 }
 
 
 
-// other services like get, update, delete can be implemented similarly
+// get distribution by id
 
 const getDistributionById = async (id: ObjectId) => {
     const distribution = await FoodDistribution.findById(id);
     return distribution;
-    }
+}
 // update distribution by id
 
 
@@ -65,6 +68,40 @@ const getDistributionBySchoolAndDate = async (schoolId: ObjectId, date: Date) =>
 }
 
 
+// get distribution by school id
+const getDistributionBySchoolIdLast = async (schoolId: ObjectId) => {
+    console.log(schoolId)
+    const startOfDay = moment().startOf("day").toDate();
+    const endOfDay = moment().endOf("day").toDate();
+    const data = await FoodDistribution.findOne({
+        schoolId,
+        date: { $gte: startOfDay, $lte: endOfDay },
+        status: { $in: ["submitted", "confirmed"] },
+    })
+        .sort({ createdAt: -1 });
+
+
+
+    return data;
+}
+
+
+// branch manager get distribution for their upazila 
+
+
+const getDistributionForBranchManager = async (email: string) => {
+    const upazilaManager = await User.findOne({ email: email }).populate('accessUpazila')
+
+    console.log(upazilaManager?.accessUpazila)
+
+    const distribution = await FoodDistribution.find({
+        upazilaId: new mongoose.Types.ObjectId(upazilaManager?.accessUpazila as string),
+    });
+
+    return distribution;
+}
+
+
 
 export const distributionServices = {
     createDistribution,
@@ -73,5 +110,8 @@ export const distributionServices = {
     updateDistributionById,
     deleteDistributionById,
     getDistributionBySchoolAndDate,
+
+    // get distribution for branch manager
+    getDistributionForBranchManager,
+    getDistributionBySchoolIdLast
 }
-    

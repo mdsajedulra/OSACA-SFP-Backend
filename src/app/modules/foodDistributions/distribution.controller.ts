@@ -4,6 +4,7 @@ import sendResponse from "../../utils/sendResponse";
 import { distributionServices } from "./distribution.service";
 import { ObjectId } from "mongodb";
 import { get } from "mongoose";
+import { cleanRegex } from "zod/v4/core/util.cjs";
 
 const createDistribution = catchAsync(async (req, res)=>{
     const distribution = await distributionServices.createDistribution(req.body);
@@ -64,6 +65,37 @@ const deleteDistributionById = catchAsync(async (req, res)=>{
         message: "Distribution deleted successfully",
     });
 })
+// get distribution by school id 
+
+const getDistributionBySchoolIdLast = catchAsync(async (req, res)=>{
+    const distribution = await distributionServices.getDistributionBySchoolIdLast(req.params.id as unknown as ObjectId,);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Distribution found successfully",
+        data: distribution,
+    });
+})
+
+// get 
+
+
+// get distribution for branch manager
+
+const getDistributionForBranchManager = catchAsync(async (req, res)=>{
+
+    const user = req.user;
+    console.log(user)
+    
+    const distributions = await distributionServices.getDistributionForBranchManager(user?.email);
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Distributions retrieved successfully",
+        data: distributions,
+    });
+
+})
 
 export const distributionController = {
     createDistribution,
@@ -71,4 +103,7 @@ export const distributionController = {
     getAllDistributions,
     updateDistributionById,
     deleteDistributionById,
+    // get distribution for branch manager
+    getDistributionForBranchManager,
+    getDistributionBySchoolIdLast
 }

@@ -70,6 +70,7 @@ const FoodDistributionSchema = new Schema<IFoodDistribution>(
         confirmedBy: {
             type: Schema.Types.ObjectId,
             ref: "School",
+            required: false,
         },
 
         confirmedAt: Date,
