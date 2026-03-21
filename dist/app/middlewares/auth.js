@@ -17,7 +17,7 @@ const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const user_model_1 = require("../modules/user/user.model");
 const auth = (...requiredRole) => (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authorization = req.headers.authorization;
-    // console.log(authorization?.split(" "));
+    console.log(authorization === null || authorization === void 0 ? void 0 : authorization.split(" "));
     if (!authorization) {
         throw new Error('Authorization Required');
     }

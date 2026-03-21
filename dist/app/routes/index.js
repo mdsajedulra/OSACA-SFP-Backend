@@ -9,6 +9,8 @@ const auth_routes_1 = __importDefault(require("../modules/auth/auth.routes"));
 const school_routes_1 = __importDefault(require("../modules/school/school.routes"));
 const attendance_routes_1 = __importDefault(require("../modules/Attendance/attendance.routes"));
 const contactInfo_routes_1 = __importDefault(require("../modules/contactinfo/contactInfo.routes"));
+const upazila_routes_1 = __importDefault(require("../modules/upazila/upazila.routes"));
+const distribution_routes_1 = __importDefault(require("../modules/foodDistributions/distribution.routes"));
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -20,16 +22,24 @@ const moduleRoutes = [
         route: auth_routes_1.default,
     },
     {
+        path: "/upazila",
+        route: upazila_routes_1.default,
+    },
+    {
         path: "/school",
         route: school_routes_1.default,
     },
     {
-        path: "/attendance",
-        route: attendance_routes_1.default,
+        path: "/distribution",
+        route: distribution_routes_1.default,
     },
     {
         path: "/contactinfo",
         route: contactInfo_routes_1.default,
+    },
+    {
+        path: "/attendance",
+        route: attendance_routes_1.default,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

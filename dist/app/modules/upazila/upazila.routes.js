@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const upazila_controller_1 = require("./upazila.controller");
+const upazilaRouter = (0, express_1.Router)();
+upazilaRouter.post("/", upazila_controller_1.upazilaController.createUpazila);
+upazilaRouter.get("/", upazila_controller_1.upazilaController.getAllUpazila);
+upazilaRouter.get("/:id", upazila_controller_1.upazilaController.getSingleUpazila);
+upazilaRouter.patch("/:id", upazila_controller_1.upazilaController.updateUpazila);
+exports.default = upazilaRouter;
