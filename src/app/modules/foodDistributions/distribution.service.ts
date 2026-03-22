@@ -11,26 +11,43 @@ import moment from "moment-timezone";
 
 
 const createDistribution = async (payload: IFoodDistribution) => {
+  const school = await schoolModel.findById(payload.schoolId);
 
+  if (!school) {
+    throw new Error("School not found");
+  }
 
-    const school = await schoolModel.findById(payload.schoolId);
+  // existing distribution check
+  let distribution = await FoodDistribution.findOne({
+    schoolId: payload.schoolId,
+    date: payload.date,
+  });
 
-    if (!school) {
-        throw new Error("School not found");
+  if (distribution) {
+    // 🔥 duplicate food check
+    const existingFoods = distribution.items.map((item) =>
+      item.food.toLowerCase()
+    );
+
+    for (const newItem of payload.items) {
+      if (existingFoods.includes(newItem.food.toLowerCase())) {
+        throw new Error(`Food "${newItem.food}" already exists for this date`);
+      }
     }
 
-    const existingDistribution = await FoodDistribution.findOne({
-        schoolId: payload.schoolId,
-        date: payload.date,
-    });
+    // ✅ push new items
+    distribution.items.push(...payload.items);
 
-    if (existingDistribution) {
-        throw new Error("Distribution for this school and date already exists");
-    }
-    const distribution = await FoodDistribution.create(payload);
+    await distribution.save();
+
     return distribution;
+  }
 
-}
+  // ✅ new distribution create
+  const newDistribution = await FoodDistribution.create(payload);
+
+  return newDistribution;
+};
 
 // get all distribution
 

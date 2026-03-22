@@ -24,15 +24,27 @@ const createDistribution = (payload) => __awaiter(void 0, void 0, void 0, functi
     if (!school) {
         throw new Error("School not found");
     }
-    const existingDistribution = yield distribution_model_1.FoodDistribution.findOne({
+    // existing distribution check
+    let distribution = yield distribution_model_1.FoodDistribution.findOne({
         schoolId: payload.schoolId,
         date: payload.date,
     });
-    if (existingDistribution) {
-        throw new Error("Distribution for this school and date already exists");
+    if (distribution) {
+        // 🔥 duplicate food check
+        const existingFoods = distribution.items.map((item) => item.food.toLowerCase());
+        for (const newItem of payload.items) {
+            if (existingFoods.includes(newItem.food.toLowerCase())) {
+                throw new Error(`Food "${newItem.food}" already exists for this date`);
+            }
+        }
+        // ✅ push new items
+        distribution.items.push(...payload.items);
+        yield distribution.save();
+        return distribution;
     }
-    const distribution = yield distribution_model_1.FoodDistribution.create(payload);
-    return distribution;
+    // ✅ new distribution create
+    const newDistribution = yield distribution_model_1.FoodDistribution.create(payload);
+    return newDistribution;
 });
 // get all distribution
 const getAllDistributions = () => __awaiter(void 0, void 0, void 0, function* () {
