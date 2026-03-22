@@ -4,9 +4,10 @@ import sendResponse from "../../utils/sendResponse";
 import { schoolService } from "./school.service";
 import { ObjectId } from "mongodb";
 import XLSX from "xlsx";
-import { ISchool } from "./school.interface";
+import type { ISchool } from "./school.interface";
 import fs from "fs";
 import { Types } from "mongoose";
+import { get } from "http";
 
 
 type ExcelRow = {
@@ -85,7 +86,10 @@ const bulkSchool = catchAsync(async (req, res) => {
 
   const data = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
 
-  const schools: ISchool[] = data.map((row) => ({
+  console.log(data);
+
+  
+  const schools = data.map((row) => ({
     schoolName: row.schoolName,
     schoolCode: row.schoolCode,
     password: row.password,
@@ -101,13 +105,16 @@ const bulkSchool = catchAsync(async (req, res) => {
     defaultItems: 0,
 
     address: {
-      upazilaId: new Types.ObjectId(row.upazilaId),
+      upazilaId:  row.upazilaId as unknown as Types.ObjectId,
       union: row.union,
       district: row.district,
     },
   }));
 
-  const result = await schoolService.bulkSchool(schools);
+
+console.log(schools);
+
+  const result = await schoolService.bulkSchool(schools as ISchool[]);
 
   fs.unlinkSync(filePath);
 
@@ -119,6 +126,18 @@ const bulkSchool = catchAsync(async (req, res) => {
   });
 });
 
+// get school for branch manager
+
+const getSchoolForBranchManager = catchAsync(async (req, res) => {
+    const email = req.user?.email as string;
+    const result = await schoolService.getSchoolForBranchManager(email);
+    sendResponse(res, {
+      message: "Schools retrieved successfully",
+      statusCode: StatusCodes.OK,
+      success: true,
+      data: result,
+    });
+});
 
 
 
@@ -132,4 +151,5 @@ export const schoolController = {
   getAllSchool,
   updateSchool,
   bulkSchool,
+  getSchoolForBranchManager
 };

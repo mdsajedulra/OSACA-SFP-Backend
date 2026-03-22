@@ -1,6 +1,10 @@
 import { ObjectId } from "mongodb";
 import { ISchool, ISchoolLogin } from "./school.interface";
 import schoolModel from "./school.model";
+import mongoose, { Types } from "mongoose";
+import { FoodDistribution } from "../foodDistributions/distribution.model";
+import { User } from "../user/user.model";
+import { IUpazila } from "../upazila/upazila.interface";
 
 const createSchool = async (payload: ISchool) => {
   const result = await schoolModel.create(payload);
@@ -48,10 +52,34 @@ const bulkSchool = async (payload: ISchool[]) => {
   return result
 };
 
+
+
+const getSchoolForBranchManager = async (email: string) => {
+    const upazilaManager  = await User.findOne({ email: email }).populate<{ accessUpazila: { _id: Types.ObjectId } }>('accessUpazila')
+
+    console.log(upazilaManager?.accessUpazila?._id);
+    const school = await schoolModel.find({
+        "address.upazilaId": new mongoose.Types.ObjectId(upazilaManager?.accessUpazila?._id),
+    });
+
+
+
+    return school;
+}
+
+
+
+
+
+
+
+
+
 export const schoolService = {
   createSchool,
   schoolLogin,
   getAllSchool,
   updateSchool,
   bulkSchool,
+  getSchoolForBranchManager
 };

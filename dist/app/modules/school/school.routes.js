@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const school_controller_1 = require("./school.controller");
 const multer_1 = __importDefault(require("multer"));
+const auth_1 = __importDefault(require("../../middlewares/auth"));
 const schoolRouter = (0, express_1.Router)();
 const upload = (0, multer_1.default)({ dest: "uploads/" });
 schoolRouter.post("/", school_controller_1.schoolController.createSchool);
@@ -13,4 +14,5 @@ schoolRouter.post("/bulk", upload.single("file"), school_controller_1.schoolCont
 schoolRouter.get("/", school_controller_1.schoolController.getAllSchool);
 schoolRouter.patch("/:id", school_controller_1.schoolController.updateSchool);
 schoolRouter.post("/school-login", school_controller_1.schoolController.schoolLogin);
+schoolRouter.get("/branch-manager", (0, auth_1.default)("upazilaManager"), school_controller_1.schoolController.getSchoolForBranchManager);
 exports.default = schoolRouter;

@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.schoolService = void 0;
 const school_model_1 = __importDefault(require("./school.model"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const user_model_1 = require("../user/user.model");
 const createSchool = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield school_model_1.default.create(payload);
     return result;
@@ -52,10 +54,20 @@ const bulkSchool = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         throw new Error("Some went wrong, check exel file");
     return result;
 });
+const getSchoolForBranchManager = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    const upazilaManager = yield user_model_1.User.findOne({ email: email }).populate('accessUpazila');
+    console.log((_a = upazilaManager === null || upazilaManager === void 0 ? void 0 : upazilaManager.accessUpazila) === null || _a === void 0 ? void 0 : _a._id);
+    const school = yield school_model_1.default.find({
+        "address.upazilaId": new mongoose_1.default.Types.ObjectId((_b = upazilaManager === null || upazilaManager === void 0 ? void 0 : upazilaManager.accessUpazila) === null || _b === void 0 ? void 0 : _b._id),
+    });
+    return school;
+});
 exports.schoolService = {
     createSchool,
     schoolLogin,
     getAllSchool,
     updateSchool,
     bulkSchool,
+    getSchoolForBranchManager
 };

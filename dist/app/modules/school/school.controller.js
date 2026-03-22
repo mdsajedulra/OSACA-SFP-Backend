@@ -19,7 +19,6 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const school_service_1 = require("./school.service");
 const xlsx_1 = __importDefault(require("xlsx"));
 const fs_1 = __importDefault(require("fs"));
-const mongoose_1 = require("mongoose");
 const createSchool = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const payload = req.body;
     const result = yield school_service_1.schoolService.createSchool(payload);
@@ -72,6 +71,7 @@ const bulkSchool = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const data = xlsx_1.default.utils.sheet_to_json(sheet);
+    console.log(data);
     const schools = data.map((row) => {
         var _a;
         return ({
@@ -87,17 +87,30 @@ const bulkSchool = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
             // ✅ required field
             defaultItems: 0,
             address: {
-                upazilaId: new mongoose_1.Types.ObjectId(row.upazilaId),
+                upazilaId: row.upazilaId,
                 union: row.union,
                 district: row.district,
             },
         });
     });
+    console.log(schools);
     const result = yield school_service_1.schoolService.bulkSchool(schools);
     fs_1.default.unlinkSync(filePath);
     (0, sendResponse_1.default)(res, {
         message: "Schools created successfully",
         statusCode: http_status_codes_1.StatusCodes.CREATED,
+        success: true,
+        data: result,
+    });
+}));
+// get school for branch manager
+const getSchoolForBranchManager = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const email = (_a = req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const result = yield school_service_1.schoolService.getSchoolForBranchManager(email);
+    (0, sendResponse_1.default)(res, {
+        message: "Schools retrieved successfully",
+        statusCode: http_status_codes_1.StatusCodes.OK,
         success: true,
         data: result,
     });
@@ -108,4 +121,5 @@ exports.schoolController = {
     getAllSchool,
     updateSchool,
     bulkSchool,
+    getSchoolForBranchManager
 };
