@@ -11,6 +11,7 @@ const globalErrorHandler_1 = require("./app/middlewares/globalErrorHandler");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 const allowedOrigins = [
+    "*",
     "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:8081",
