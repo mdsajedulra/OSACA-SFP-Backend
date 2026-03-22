@@ -36,9 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const AddressSchema = new mongoose_1.Schema({
     union: { type: String, required: true },
-    upazila: { type: String, required: true },
     district: { type: String, required: true },
-    division: { type: String, required: true },
 });
 const SchoolSchema = new mongoose_1.Schema({
     schoolName: { type: String, required: true },
@@ -50,5 +48,6 @@ const SchoolSchema = new mongoose_1.Schema({
     totalStudent: { type: Number, required: true },
     address: { type: AddressSchema, required: true },
     showDetails: { type: String, required: false },
+    defaultItems: { type: Number, required: true, default: 0 },
 }, { timestamps: true, strict: true });
 exports.default = mongoose_1.default.model("School", SchoolSchema);
