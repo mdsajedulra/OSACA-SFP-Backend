@@ -16,7 +16,7 @@ exports.distributionServices = void 0;
 const school_model_1 = __importDefault(require("../school/school.model"));
 const distribution_model_1 = require("./distribution.model");
 const user_model_1 = require("../user/user.model");
-const mongoose_1 = __importDefault(require("mongoose"));
+const mongoose_1 = require("mongoose");
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
 // create distribution service function 
 const createDistribution = (payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -74,11 +74,18 @@ const getDistributionBySchoolIdLast = (schoolId) => __awaiter(void 0, void 0, vo
 });
 // branch manager get distribution for their upazila 
 const getDistributionForBranchManager = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const upazilaManager = yield user_model_1.User.findOne({ email: email }).populate('accessUpazila');
-    console.log(upazilaManager === null || upazilaManager === void 0 ? void 0 : upazilaManager.accessUpazila);
-    const distribution = yield distribution_model_1.FoodDistribution.find({
-        upazilaId: new mongoose_1.default.Types.ObjectId(upazilaManager === null || upazilaManager === void 0 ? void 0 : upazilaManager.accessUpazila),
-    });
+    var _a;
+    const upazilaManager = yield user_model_1.User.findOne({ email })
+        .populate("accessUpazila"); // typeScript ignore for now
+    const upazilaIdRaw = (_a = upazilaManager === null || upazilaManager === void 0 ? void 0 : upazilaManager.accessUpazila) === null || _a === void 0 ? void 0 : _a._id;
+    if (!upazilaIdRaw) {
+        throw new Error("This user has no accessUpazila assigned or populate failed");
+    }
+    // convert string/ObjectId safely
+    const upazilaId = typeof upazilaIdRaw === "string" ? new mongoose_1.Types.ObjectId(upazilaIdRaw) : upazilaIdRaw;
+    console.log("Querying for Upazila ID:", upazilaId);
+    const distribution = yield distribution_model_1.FoodDistribution.find({ upazilaId }).populate("schoolId").populate("upazilaId"); // populate school name and address
+    console.log("Distribution found:", distribution.length);
     return distribution;
 });
 exports.distributionServices = {

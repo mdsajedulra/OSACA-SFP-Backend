@@ -3,7 +3,7 @@ import schoolModel from "../school/school.model";
 import { IFoodDistribution } from "./distribution.interface";
 import { FoodDistribution } from "./distribution.model";
 import { User } from "../user/user.model";
-import mongoose, { get } from "mongoose";
+import mongoose, { get, Types } from "mongoose";
 import moment from "moment-timezone";
 
 
@@ -89,17 +89,29 @@ const getDistributionBySchoolIdLast = async (schoolId: ObjectId) => {
 // branch manager get distribution for their upazila 
 
 
+
+
 const getDistributionForBranchManager = async (email: string) => {
-    const upazilaManager = await User.findOne({ email: email }).populate('accessUpazila')
+  const upazilaManager = await User.findOne({ email })
+    .populate<{ accessUpazila: { _id: Types.ObjectId } }>("accessUpazila"); // typeScript ignore for now
 
-    console.log(upazilaManager?.accessUpazila)
+  const upazilaIdRaw = upazilaManager?.accessUpazila?._id;
 
-    const distribution = await FoodDistribution.find({
-        upazilaId: new mongoose.Types.ObjectId(upazilaManager?.accessUpazila as string),
-    });
+  if (!upazilaIdRaw) {
+    throw new Error("This user has no accessUpazila assigned or populate failed");
+  }
 
-    return distribution;
-}
+  // convert string/ObjectId safely
+  const upazilaId = typeof upazilaIdRaw === "string" ? new Types.ObjectId(upazilaIdRaw) : upazilaIdRaw;
+
+  console.log("Querying for Upazila ID:", upazilaId);
+
+  const distribution = await FoodDistribution.find({ upazilaId }).populate("schoolId").populate("upazilaId"); // populate school name and address
+
+  console.log("Distribution found:", distribution.length);
+
+  return distribution;
+};
 
 
 

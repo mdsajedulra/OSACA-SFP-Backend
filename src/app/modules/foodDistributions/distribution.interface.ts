@@ -21,6 +21,7 @@ export interface IFoodDistribution {
 
   schoolId: ObjectId;
   
+  upazilaId: ObjectId;
 
   date: Date;
   days: number;

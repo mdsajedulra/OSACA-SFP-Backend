@@ -65,6 +65,11 @@ const FoodDistributionSchema = new mongoose_1.Schema({
         ref: "School",
         required: true,
     },
+    upazilaId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Upazila",
+        required: true,
+    },
     date: {
         type: Date,
         required: true,
