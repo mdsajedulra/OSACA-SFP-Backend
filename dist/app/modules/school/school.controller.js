@@ -24,7 +24,7 @@ const createSchool = (0, catchAsync_1.default)((req, res, next) => __awaiter(voi
     const result = yield school_service_1.schoolService.createSchool(payload);
     (0, sendResponse_1.default)(res, {
         message: "School created Successfully",
-        statusCode: http_status_codes_1.StatusCodes.CREATED,
+        statusCode: http_status_codes_1.StatusCodes.OK,
         success: true,
         data: result,
     });

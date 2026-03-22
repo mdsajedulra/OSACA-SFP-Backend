@@ -20,7 +20,7 @@ export interface IFoodDistribution {
   uuid: string; // unique
 
   schoolId: ObjectId;
-  upazilaId: Schema.Types.ObjectId;
+  
 
   date: Date;
   days: number;

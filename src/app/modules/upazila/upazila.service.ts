@@ -21,10 +21,17 @@ const updateUpazila = async (id: ObjectId, payload: Partial<IUpazila>) => {
   });
   return result;
 };
+// delete upazila 
+
+const deleteUpazila = async (id: ObjectId) => {
+  const result = await Upazila.findByIdAndDelete(id);
+  return result;
+};
 
 export const upazilaService = {
   createUpazila,
   getAllUpazila,
   getSingleUpazila,
   updateUpazila,
+  deleteUpazila,
 };

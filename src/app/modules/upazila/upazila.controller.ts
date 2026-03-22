@@ -3,6 +3,7 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { upazilaService } from "./upazila.service";
 import { ObjectId } from "mongoose";
+import { de } from "zod/v4/locales";
 
 const createUpazila = catchAsync(async (req, res, next) => {
   const result = await upazilaService.createUpazila(req.body);
@@ -44,10 +45,23 @@ const updateUpazila = catchAsync(async (req, res, next) => {
     data: result,
   });
 });
+// delete upazila 
+
+const deleteUpazila = catchAsync(async (req, res, next) => {
+  const id = req.params.id as unknown as ObjectId;
+  const result = await upazilaService.deleteUpazila(id);
+  sendResponse(res, {
+    message: "upazila deleted successfully",
+    statusCode: StatusCodes.OK,
+    success: true,
+    data: result,
+  });
+});
 
 export const upazilaController = {
   createUpazila,
   getAllUpazila,
   getSingleUpazila,
   updateUpazila,
+  deleteUpazila,
 };

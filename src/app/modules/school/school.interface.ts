@@ -1,6 +1,7 @@
 import { ObjectId } from "mongoose";
 
-interface IAddress {
+export interface IAddress {
+  upazilaId: ObjectId;
   union: string;
   district: string;
 }

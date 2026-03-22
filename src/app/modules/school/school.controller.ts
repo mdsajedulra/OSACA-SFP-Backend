@@ -12,7 +12,7 @@ const createSchool = catchAsync(async (req, res, next) => {
   const result = await schoolService.createSchool(payload);
   sendResponse(res, {
     message: "School created Successfully",
-    statusCode: StatusCodes.CREATED,
+    statusCode: StatusCodes.OK,
     success: true,
     data: result,
   });

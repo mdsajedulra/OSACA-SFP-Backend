@@ -29,9 +29,15 @@ const updateUpazila = (id, payload) => __awaiter(void 0, void 0, void 0, functio
     });
     return result;
 });
+// delete upazila 
+const deleteUpazila = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield upazila_model_1.Upazila.findByIdAndDelete(id);
+    return result;
+});
 exports.upazilaService = {
     createUpazila,
     getAllUpazila,
     getSingleUpazila,
     updateUpazila,
+    deleteUpazila,
 };

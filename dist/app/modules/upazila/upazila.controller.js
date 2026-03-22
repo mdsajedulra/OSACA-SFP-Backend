@@ -55,9 +55,21 @@ const updateUpazila = (0, catchAsync_1.default)((req, res, next) => __awaiter(vo
         data: result,
     });
 }));
+// delete upazila 
+const deleteUpazila = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const result = yield upazila_service_1.upazilaService.deleteUpazila(id);
+    (0, sendResponse_1.default)(res, {
+        message: "upazila deleted successfully",
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        success: true,
+        data: result,
+    });
+}));
 exports.upazilaController = {
     createUpazila,
     getAllUpazila,
     getSingleUpazila,
     updateUpazila,
+    deleteUpazila,
 };

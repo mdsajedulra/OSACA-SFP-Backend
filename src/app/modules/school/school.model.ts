@@ -1,8 +1,15 @@
 import mongoose, { Schema } from "mongoose";
-import { ISchool } from "./school.interface";
+import { IAddress, ISchool } from "./school.interface";
 
-const AddressSchema: Schema = new Schema({
+
+const AddressSchema: Schema<IAddress> = new Schema({
   
+    upazilaId: {
+            type: Schema.Types.ObjectId,
+            ref: "Upazila",
+            required: true,
+        },
+
   union: { type: String, required: true },
   
   district: { type: String, required: true },

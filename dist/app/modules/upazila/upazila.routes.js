@@ -7,4 +7,5 @@ upazilaRouter.post("/", upazila_controller_1.upazilaController.createUpazila);
 upazilaRouter.get("/", upazila_controller_1.upazilaController.getAllUpazila);
 upazilaRouter.get("/:id", upazila_controller_1.upazilaController.getSingleUpazila);
 upazilaRouter.patch("/:id", upazila_controller_1.upazilaController.updateUpazila);
+upazilaRouter.delete("/:id", upazila_controller_1.upazilaController.deleteUpazila);
 exports.default = upazilaRouter;

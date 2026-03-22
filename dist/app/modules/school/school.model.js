@@ -35,6 +35,11 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const AddressSchema = new mongoose_1.Schema({
+    upazilaId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Upazila",
+        required: true,
+    },
     union: { type: String, required: true },
     district: { type: String, required: true },
 });

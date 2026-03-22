@@ -41,11 +41,7 @@ const FoodDistributionSchema = new Schema<IFoodDistribution>(
             ref: "School",
             required: true,
         },
-        upazilaId: {
-            type: Schema.Types.ObjectId,
-            ref: "Upazila",
-            required: true,
-        },
+      
         date: {
             type: Date,
             required: true,
