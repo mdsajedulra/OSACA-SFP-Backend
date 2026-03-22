@@ -38,6 +38,7 @@ const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         expiresIn: "1d",
     });
     const verifiedUser = {
+        _id: user === null || user === void 0 ? void 0 : user._id,
         name: user === null || user === void 0 ? void 0 : user.name,
         email: user === null || user === void 0 ? void 0 : user.email,
         role: user === null || user === void 0 ? void 0 : user.role,

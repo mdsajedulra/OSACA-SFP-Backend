@@ -31,6 +31,7 @@ const login = async (payload: ILoginUser) => {
     expiresIn: "1d",
   });
   const verifiedUser = {
+    _id: user?._id,
     name: user?.name,
     email: user?.email,
     role: user?.role,
