@@ -36,7 +36,7 @@ const createDistribution = (payload) => __awaiter(void 0, void 0, void 0, functi
 });
 // get all distribution
 const getAllDistributions = () => __awaiter(void 0, void 0, void 0, function* () {
-    const distributions = yield distribution_model_1.FoodDistribution.find();
+    const distributions = yield distribution_model_1.FoodDistribution.find().populate("schoolId").populate("upazilaId");
     return distributions;
 });
 // get distribution by id

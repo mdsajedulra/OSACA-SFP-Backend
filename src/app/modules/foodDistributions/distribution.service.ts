@@ -35,7 +35,7 @@ const createDistribution = async (payload: IFoodDistribution) => {
 // get all distribution
 
 const getAllDistributions = async () => {
-    const distributions = await FoodDistribution.find();
+    const distributions = await FoodDistribution.find().populate("schoolId").populate("upazilaId");
     return distributions;
 }
 
