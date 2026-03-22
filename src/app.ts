@@ -10,6 +10,9 @@ app.use(express.json());
 
 const allowedOrigins = [
   "*",
+  "lovable.app",
+  "https://lovable.dev",
+
   "http://localhost:5173",
   "http://localhost:3000",
   "http://localhost:8081",

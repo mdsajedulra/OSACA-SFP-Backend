@@ -12,6 +12,8 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 const allowedOrigins = [
     "*",
+    "lovable.app",
+    "https://lovable.dev",
     "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:8081",
