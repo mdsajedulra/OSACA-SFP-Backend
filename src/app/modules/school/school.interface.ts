@@ -1,12 +1,13 @@
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
+
 
 export interface IAddress {
-  upazilaId: ObjectId;
+  upazilaId: Types.ObjectId;
   union: string;
   district: string;
 }
 
-export interface ISchool extends Document {
+export interface ISchool  {
   schoolName: string;
   schoolCode: string;
   password: string;

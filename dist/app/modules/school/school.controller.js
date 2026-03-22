@@ -19,6 +19,7 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const school_service_1 = require("./school.service");
 const xlsx_1 = __importDefault(require("xlsx"));
 const fs_1 = __importDefault(require("fs"));
+const mongoose_1 = require("mongoose");
 const createSchool = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const payload = req.body;
     const result = yield school_service_1.schoolService.createSchool(payload);
@@ -71,24 +72,27 @@ const bulkSchool = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const data = xlsx_1.default.utils.sheet_to_json(sheet);
-    const schools = data.map((row) => ({
-        schoolName: row.schoolName,
-        schoolCode: row.schoolCode,
-        password: row.password,
-        concernMobileNumber: row.concernMobileNumber,
-        concernName: row.concernName,
-        totalTeacher: row.totalTeacher,
-        totalStudent: row.totalStudent,
-        showDetails: row.showDetails,
-        address: {
-            village: row.village,
-            union: row.union,
-            upazila: row.upazila,
-            district: row.district,
-            division: row.division,
-        },
-    }));
-    // console.log(schools);
+    const schools = data.map((row) => {
+        var _a;
+        return ({
+            schoolName: row.schoolName,
+            schoolCode: row.schoolCode,
+            password: row.password,
+            concernMobileNumber: row.concernMobileNumber,
+            concernName: row.concernName,
+            totalTeacher: Number(row.totalTeacher),
+            totalStudent: Number(row.totalStudent),
+            // ✅ STRING (URL / link)
+            showDetails: ((_a = row.showDetails) === null || _a === void 0 ? void 0 : _a.toString()) || "",
+            // ✅ required field
+            defaultItems: 0,
+            address: {
+                upazilaId: new mongoose_1.Types.ObjectId(row.upazilaId),
+                union: row.union,
+                district: row.district,
+            },
+        });
+    });
     const result = yield school_service_1.schoolService.bulkSchool(schools);
     fs_1.default.unlinkSync(filePath);
     (0, sendResponse_1.default)(res, {

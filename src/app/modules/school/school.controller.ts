@@ -6,6 +6,22 @@ import { ObjectId } from "mongodb";
 import XLSX from "xlsx";
 import { ISchool } from "./school.interface";
 import fs from "fs";
+import { Types } from "mongoose";
+
+
+type ExcelRow = {
+  schoolName: string;
+  schoolCode: string;
+  password: string;
+  concernMobileNumber: string;
+  concernName: string;
+  totalTeacher: number | string;
+  totalStudent: number | string;
+  showDetails: string;
+  upazilaId: string;
+  union: string;
+  district: string;
+};
 
 const createSchool = catchAsync(async (req, res, next) => {
   const payload = req.body;
@@ -58,33 +74,43 @@ const updateSchool = catchAsync(async (req, res, next) => {
 });
 // create bulk school
 
+
+
 const bulkSchool = catchAsync(async (req, res) => {
   const filePath = req.file?.path as string;
+
   const workbook = XLSX.readFile(filePath);
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
-  const data = XLSX.utils.sheet_to_json(sheet);
-  const schools = data.map((row: any) => ({
+
+  const data = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
+
+  const schools: ISchool[] = data.map((row) => ({
     schoolName: row.schoolName,
     schoolCode: row.schoolCode,
     password: row.password,
     concernMobileNumber: row.concernMobileNumber,
     concernName: row.concernName,
-    totalTeacher: row.totalTeacher,
-    totalStudent: row.totalStudent,
-    showDetails: row.showDetails,
+    totalTeacher: Number(row.totalTeacher),
+    totalStudent: Number(row.totalStudent),
+
+    // ✅ STRING (URL / link)
+    showDetails: row.showDetails?.toString() || "",
+
+    // ✅ required field
+    defaultItems: 0,
+
     address: {
-      village: row.village,
+      upazilaId: new Types.ObjectId(row.upazilaId),
       union: row.union,
-      upazila: row.upazila,
       district: row.district,
-      division: row.division,
     },
   }));
 
-  // console.log(schools);
-  const result = await schoolService.bulkSchool(schools as any);
+  const result = await schoolService.bulkSchool(schools);
+
   fs.unlinkSync(filePath);
+
   sendResponse(res, {
     message: "Schools created successfully",
     statusCode: StatusCodes.CREATED,
@@ -92,6 +118,13 @@ const bulkSchool = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+
+
+
+
+
+
 
 export const schoolController = {
   createSchool,
