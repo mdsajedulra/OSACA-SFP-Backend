@@ -68,7 +68,7 @@ const deleteDistributionById = catchAsync(async (req, res)=>{
 // get distribution by school id 
 
 const getDistributionBySchoolIdLast = catchAsync(async (req, res)=>{
-    const distribution = await distributionServices.getDistributionBySchoolIdLast(req.params.id as unknown as ObjectId,);
+    const distribution = await distributionServices.getDistributionBySchoolIdLast(req.params.id as string);
     sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,

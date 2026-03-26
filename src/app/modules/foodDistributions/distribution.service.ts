@@ -86,22 +86,34 @@ const getDistributionBySchoolAndDate = async (schoolId: ObjectId, date: Date) =>
 
 
 // get distribution by school id
-const getDistributionBySchoolIdLast = async (schoolId: ObjectId) => {
-    console.log(schoolId)
-    const startOfDay = moment().startOf("day").toDate();
-    const endOfDay = moment().endOf("day").toDate();
-    const data = await FoodDistribution.findOne({
-        schoolId,
-        date: { $gte: startOfDay, $lte: endOfDay },
-        status: { $in: ["submitted", "confirmed"] },
-    })
-        .sort({ createdAt: -1 });
 
 
+const getDistributionBySchoolIdLast = async (schoolId: string) => {
 
-    return data;
-}
+  const objectId = new Types.ObjectId(schoolId)
+  const startOfDay = moment().startOf("day").toDate();
+  const endOfDay = moment().endOf("day").toDate();
 
+  // 🔹 Step 1: Try to get today's data
+  const todayData = await FoodDistribution.findOne({
+    objectId,
+    date: { $gte: startOfDay, $lte: endOfDay },
+    status: { $in: ["submitted", "confirmed"] },
+  }).sort({ createdAt: -1 });
+
+  if (todayData) {
+    return todayData; // ✅ আজকেরটাই return
+  }
+
+  // 🔹 Step 2: না থাকলে past থেকে latest data (future বাদ)
+  const lastData = await FoodDistribution.findOne({
+    schoolId,
+    date: { $lt: startOfDay }, //  future বাদ
+    status: { $in: ["submitted", "confirmed"] },
+  }).sort({ date: -1 });
+
+  return lastData;
+};
 
 // branch manager get distribution for their upazila 
 
