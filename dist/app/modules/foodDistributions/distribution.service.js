@@ -78,7 +78,7 @@ const getDistributionBySchoolIdLast = (schoolId) => __awaiter(void 0, void 0, vo
     const endOfDay = (0, moment_timezone_1.default)().endOf("day").toDate();
     // 🔹 Step 1: Try to get today's data
     const todayData = yield distribution_model_1.FoodDistribution.findOne({
-        objectId,
+        schoolId: objectId,
         date: { $gte: startOfDay, $lte: endOfDay },
         status: { $in: ["submitted", "confirmed"] },
     }).sort({ createdAt: -1 });

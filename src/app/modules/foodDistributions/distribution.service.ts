@@ -96,7 +96,7 @@ const getDistributionBySchoolIdLast = async (schoolId: string) => {
 
   // 🔹 Step 1: Try to get today's data
   const todayData = await FoodDistribution.findOne({
-    objectId,
+    schoolId: objectId,
     date: { $gte: startOfDay, $lte: endOfDay },
     status: { $in: ["submitted", "confirmed"] },
   }).sort({ createdAt: -1 });
