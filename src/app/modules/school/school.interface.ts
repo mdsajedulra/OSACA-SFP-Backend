@@ -1,4 +1,4 @@
-import {  Types } from "mongoose";
+import { Types } from "mongoose";
 
 export interface IAddress {
   upazilaId: Types.ObjectId;
@@ -6,21 +6,33 @@ export interface IAddress {
   district: string;
 }
 
-export interface ISchool extends Document {
+export interface ISchool  {
   schoolName: string;
+  schoolNameBangla: string;
   schoolCode: string;
   password: string;
-  concernMobileNumber: string;
-  concernName: string;
-  totalTeacher: number;
+
+  headTeacherPhoneNumber: string;
+  headTeacherName: string;
+
+  tifinManager?: string;
+  tifinManagerPNumber?: string;
+
+
   totalStudent: number;
+
   address: IAddress;
+
+
+
+  numberOfStudent: number;
   defaultItems: number;
-  showDetails: string;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-interface ISchoolLogin {
+export interface ISchoolLogin {
   schoolCode: string;
   password: string;
 }
-export { ISchoolLogin };

@@ -60,7 +60,7 @@ const getSchoolForBranchManager = (email) => __awaiter(void 0, void 0, void 0, f
     console.log((_a = upazilaManager === null || upazilaManager === void 0 ? void 0 : upazilaManager.accessUpazila) === null || _a === void 0 ? void 0 : _a._id);
     const school = yield school_model_1.default.find({
         "address.upazilaId": new mongoose_1.default.Types.ObjectId((_b = upazilaManager === null || upazilaManager === void 0 ? void 0 : upazilaManager.accessUpazila) === null || _b === void 0 ? void 0 : _b._id),
-    });
+    }).populate('address.upazilaId').populate('address.upazilaId');
     return school;
 });
 exports.schoolService = {

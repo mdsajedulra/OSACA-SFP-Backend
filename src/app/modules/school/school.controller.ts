@@ -4,21 +4,30 @@ import sendResponse from "../../utils/sendResponse";
 import { schoolService } from "./school.service";
 import { ObjectId } from "mongodb";
 import XLSX from "xlsx";
-import type { ISchool } from "./school.interface";
+
 import fs from "fs";
 import { Types } from "mongoose";
-import { get } from "http";
+import { ISchool } from "./school.interface";
+
 
 
 type ExcelRow = {
   schoolName: string;
+  schoolNameBangla: string;
   schoolCode: string;
   password: string;
-  concernMobileNumber: string;
-  concernName: string;
-  totalTeacher: number | string;
+
+  headTeacherPhoneNumber: string;
+  headTeacherName: string;
+
+  tifinManager?: string;
+  tifinManagerNumber?: string;
+
+
   totalStudent: number | string;
-  showDetails: string;
+
+
+defaultItem: number | string;
   upazilaId: string;
   union: string;
   district: string;
@@ -87,25 +96,27 @@ const bulkSchool = catchAsync(async (req, res) => {
   const data = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
 
   console.log(data);
-
   
   const schools = data.map((row) => ({
     schoolName: row.schoolName,
+    schoolNameBangla: row.schoolNameBangla,
     schoolCode: row.schoolCode,
     password: row.password,
-    concernMobileNumber: row.concernMobileNumber,
-    concernName: row.concernName,
-    totalTeacher: Number(row.totalTeacher),
+    headTeacherPhoneNumber: row.headTeacherPhoneNumber,
+    headTeacherName: row.headTeacherName,
+    tifinManager: row.tifinManager || "",
+    tifinManagerPNumber: row.tifinManagerNumber || "", 
+   
     totalStudent: Number(row.totalStudent),
 
     // ✅ STRING (URL / link)
-    showDetails: row.showDetails?.toString() || "",
 
     // ✅ required field
-    defaultItems: 0,
+    
+    defaultItems: Number(row.defaultItem) || 0,
 
     address: {
-      upazilaId:  row.upazilaId as unknown as Types.ObjectId,
+      upazilaId:  row.upazilaId,
       union: row.union,
       district: row.district,
     },
@@ -114,7 +125,7 @@ const bulkSchool = catchAsync(async (req, res) => {
 
 console.log(schools);
 
-  const result = await schoolService.bulkSchool(schools as ISchool[]);
+  const result = await schoolService.bulkSchool(schools as unknown as ISchool[]);
 
   fs.unlinkSync(filePath);
 

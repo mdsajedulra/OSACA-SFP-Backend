@@ -60,7 +60,7 @@ const getSchoolForBranchManager = async (email: string) => {
     console.log(upazilaManager?.accessUpazila?._id);
     const school = await schoolModel.find({
         "address.upazilaId": new mongoose.Types.ObjectId(upazilaManager?.accessUpazila?._id),
-    });
+    }).populate<{ address: { upazilaId: Types.ObjectId } }>('address.upazilaId').populate<{ address: { upazilaId: IUpazila } }>('address.upazilaId');
 
 
 

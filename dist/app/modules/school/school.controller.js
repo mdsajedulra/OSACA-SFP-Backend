@@ -72,27 +72,25 @@ const bulkSchool = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     const sheet = workbook.Sheets[sheetName];
     const data = xlsx_1.default.utils.sheet_to_json(sheet);
     console.log(data);
-    const schools = data.map((row) => {
-        var _a;
-        return ({
-            schoolName: row.schoolName,
-            schoolCode: row.schoolCode,
-            password: row.password,
-            concernMobileNumber: row.concernMobileNumber,
-            concernName: row.concernName,
-            totalTeacher: Number(row.totalTeacher),
-            totalStudent: Number(row.totalStudent),
-            // ✅ STRING (URL / link)
-            showDetails: ((_a = row.showDetails) === null || _a === void 0 ? void 0 : _a.toString()) || "",
-            // ✅ required field
-            defaultItems: 0,
-            address: {
-                upazilaId: row.upazilaId,
-                union: row.union,
-                district: row.district,
-            },
-        });
-    });
+    const schools = data.map((row) => ({
+        schoolName: row.schoolName,
+        schoolNameBangla: row.schoolNameBangla,
+        schoolCode: row.schoolCode,
+        password: row.password,
+        headTeacherPhoneNumber: row.headTeacherPhoneNumber,
+        headTeacherName: row.headTeacherName,
+        tifinManager: row.tifinManager || "",
+        tifinManagerPNumber: row.tifinManagerNumber || "",
+        totalStudent: Number(row.totalStudent),
+        // ✅ STRING (URL / link)
+        // ✅ required field
+        defaultItems: Number(row.defaultItem) || 0,
+        address: {
+            upazilaId: row.upazilaId,
+            union: row.union,
+            district: row.district,
+        },
+    }));
     console.log(schools);
     const result = yield school_service_1.schoolService.bulkSchool(schools);
     fs_1.default.unlinkSync(filePath);
