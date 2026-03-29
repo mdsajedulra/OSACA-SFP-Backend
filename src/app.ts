@@ -7,7 +7,7 @@ import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 const app: Application = express();
 app.use(express.json());
 
-// ✅ allowed origins (clean)
+// ✅ allowed origins
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
@@ -19,38 +19,39 @@ const allowedOrigins = [
   "https://sfp.osacabd.org",
 ];
 
-// ✅ dynamic CORS handler (no issues)
+// ✅ CORS setup (safe + flexible)
 app.use(
   cors({
     origin: (origin, callback) => {
-      // 🔥 allow requests with no origin (mobile apps, postman)
+      // allow mobile app / postman
       if (!origin) return callback(null, true);
 
-      // 🔥 allow localhost সব port
+      // allow localhost সব port
       if (origin.startsWith("http://localhost")) {
         return callback(null, true);
       }
 
-      // 🔥 allow local network (192.168...)
+      // allow local network
       if (origin.startsWith("http://192.168")) {
         return callback(null, true);
       }
 
-      // 🔥 allow from list
+      // allow specific domains
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      // ❌ block others
+      // block others
       return callback(new Error("CORS blocked: " + origin));
     },
     credentials: true,
   })
 );
 
-// ✅ preflight fix (important)
-app.options("*", cors());
+// ❌ REMOVE this line (this was causing error)
+// app.options("*", cors());
 
+// ✅ routes
 app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
@@ -60,7 +61,7 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-// error handler
+// ✅ error handlers
 app.use(globalErrorHandler);
 app.use(notFound);
 
