@@ -5,6 +5,11 @@ import { distributionServices } from "./distribution.service";
 import { ObjectId } from "mongodb";
 import { get } from "mongoose";
 import { cleanRegex } from "zod/v4/core/util.cjs";
+import { generateHTML } from "../../utils/htmlTemplate";
+import { generatePDF } from "../../utils/pdfGenerator";
+import schoolModel from "../school/school.model";
+import { generateDocx } from "../../utils/docxGenerator";
+import { populate } from "dotenv";
 
 const createDistribution = catchAsync(async (req, res)=>{
     const distribution = await distributionServices.createDistribution(req.body);
@@ -97,6 +102,48 @@ const getDistributionForBranchManager = catchAsync(async (req, res)=>{
 
 })
 
+// 
+
+const schoolReport = catchAsync(async (req, res)=>{
+
+    const { schoolId } = req.params;
+  const { month, year, type } = req.query;
+
+  const data = await distributionServices.schoolReport(
+    schoolId as string,
+    Number(month),
+    Number(year)
+  );
+
+
+  const school = await schoolModel.findById(schoolId).populate("address.upazilaId").lean();
+console.log("School found:", school);
+
+  if (type === "pdf") {
+    const html = generateHTML(data, school);
+    const pdf = await generatePDF(html);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "attachment; filename=report.pdf",
+    });
+
+    return res.send(pdf);
+  }
+
+  if (type === "docx") {
+    const docx = await generateDocx(data);
+
+    res.set({
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "Content-Disposition": "attachment; filename=report.docx",
+    });
+
+    return res.send(docx);
+  }
+})
+
 export const distributionController = {
     createDistribution,
     getDistributionById,
@@ -105,5 +152,6 @@ export const distributionController = {
     deleteDistributionById,
     // get distribution for branch manager
     getDistributionForBranchManager,
-    getDistributionBySchoolIdLast
+    getDistributionBySchoolIdLast,
+    schoolReport
 }

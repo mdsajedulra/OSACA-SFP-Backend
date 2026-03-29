@@ -7,6 +7,9 @@ const distributionRouter = Router();
 distributionRouter.post("/",  distributionController.createDistribution)
 distributionRouter.get("/", distributionController.getAllDistributions)
 distributionRouter.get("/school/:id", distributionController.getDistributionBySchoolIdLast)
+distributionRouter.get("/school/report/:schoolId", distributionController.schoolReport)
+
+
 // distributionRouter.get("/school/:id/:date", distributionController.getDistributionBySchoolIdAndDate)
 distributionRouter.patch("/:id", distributionController.updateDistributionById)
 distributionRouter.delete("/:id", distributionController.deleteDistributionById)

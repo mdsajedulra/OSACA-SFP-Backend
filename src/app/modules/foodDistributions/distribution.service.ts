@@ -142,8 +142,23 @@ const getDistributionForBranchManager = async (email: string) => {
   return distribution;
 };
 
+const schoolReport = async (schoolId: string, month: number, year: number) => {
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+
+  const data = await FoodDistribution.find({
+    schoolId: new Types.ObjectId(schoolId),
+    date: { $gte: startDate, $lte: endDate },
+    status: { $in: ["submitted", "confirmed"] },
+  })
+    .sort({ date: 1 })
+    .lean();
+console.log(data)
+  return data;
 
 
+
+}
 export const distributionServices = {
     createDistribution,
     getAllDistributions,
@@ -154,5 +169,6 @@ export const distributionServices = {
 
     // get distribution for branch manager
     getDistributionForBranchManager,
-    getDistributionBySchoolIdLast
+    getDistributionBySchoolIdLast,
+    schoolReport
 }
