@@ -542,6 +542,7 @@ function buildSchoolDistributionMonthPdf(payload) {
     return __awaiter(this, void 0, void 0, function* () {
         const browser = yield puppeteer_1.default.launch({
             headless: true,
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
         try {

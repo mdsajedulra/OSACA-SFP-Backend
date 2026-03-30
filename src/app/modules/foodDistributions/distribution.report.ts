@@ -630,9 +630,10 @@ export async function buildSchoolDistributionMonthPdf(
   payload: OfficialMonthlyReportPayload
 ): Promise<Buffer> {
   const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+  headless: true,
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+});
 
   try {
     const page = await browser.newPage();
