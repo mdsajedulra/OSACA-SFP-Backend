@@ -19,10 +19,10 @@ const FoodItemSchema = z.object({
 
 // Main FoodDistribution Zod schema
 export const FoodDistributionSchema = z.object({
-  uuid: z.string()
+  challan: z.string()
     .min(1)
-    .uuid("Invalid UUID format") // অথবা .regex(/^[0-9a-f]{8}-.../) যদি custom uuid হয়
-    .optional(), // create-এর সময় backend generate করবে
+    
+    .optional(), // create-এর সময় backend generate করবে
 
   schoolId: z.string()
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid School ID"),
@@ -66,9 +66,9 @@ export const FoodDistributionSchema = z.object({
   // createdAt/updatedAt → mongoose timestamps handle করবে, তাই এখানে লাগবে না
 });
 
-// Create-এর জন্য (যেখানে uuid + confirmedBy দরকার নেই)
+// Create-এর জন্য (যেখানে challan + confirmedBy দরকার নেই)
 export const CreateFoodDistributionSchema = FoodDistributionSchema.omit({
-  uuid: true,
+  challan: true,
   status: true,
   confirmedBy: true,
   confirmedAt: true,
