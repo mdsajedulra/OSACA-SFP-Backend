@@ -105,18 +105,11 @@ function resolveFoodColumn(food: string): FoodColKey | null {
     return "banruti";
   }
 
-  if (
-    f.includes("egg") ||
-    f.includes("boiled") ||
-    /ডিম/.test(food)
-  ) {
+  if (f.includes("egg") || f.includes("boiled") || /ডিম/.test(food)) {
     return "egg";
   }
 
-  if (
-    f.includes("banana") ||
-    /কলা/.test(food)
-  ) {
+  if (f.includes("banana") || /কলা/.test(food)) {
     return "banana";
   }
 
@@ -128,11 +121,7 @@ function resolveFoodColumn(food: string): FoodColKey | null {
     return "biscuit";
   }
 
-  if (
-    f.includes("milk") ||
-    f.includes("uht") ||
-    /দুধ/.test(food)
-  ) {
+  if (f.includes("milk") || f.includes("uht") || /দুধ/.test(food)) {
     return "milk";
   }
 
@@ -263,8 +252,7 @@ export const getSchoolDistributionMonthlyReport = async (
       }
     }
 
-    const challanSource = String((dist as any).challan ?? (dist as any).uuid ?? "");
-    const challan = challanSource.replace(/-/g, "").slice(0, 14);
+    const challan = String((dist as any).challan ?? "");
 
     table.push({
       serialBn,
@@ -291,7 +279,7 @@ export const getSchoolDistributionMonthlyReport = async (
 
   return {
     schoolNameBn: school.schoolNameBangla || school.schoolName || "",
-    emisCode: school.schoolCode || "",
+    emisCode: toBengaliNumeralString(school.schoolCode || ""),
     district: school.address?.district ?? "",
     upazila: upazilaName,
     union: school.address?.union ?? "",
@@ -299,7 +287,8 @@ export const getSchoolDistributionMonthlyReport = async (
     monthBn: monthNameBn(month),
     yearBn: toBengaliNumeralString(year),
     headTeacherPhoneNumber: school.headTeacherPhoneNumber || "",
-    tifinManagerNumber: school.tifinManagerPNumber || "",
+    tifinManagerNumber:
+      (school as any).tifinManagerNumber || (school as any).tifinManagerPNumber || "",
     table,
     totals: {
       banruti: sumCols.banruti ? String(sumCols.banruti) : "",
@@ -630,10 +619,10 @@ export async function buildSchoolDistributionMonthPdf(
   payload: OfficialMonthlyReportPayload
 ): Promise<Buffer> {
   const browser = await puppeteer.launch({
-  headless: true,
-  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
-  args: ["--no-sandbox", "--disable-setuid-sandbox"],
-});
+    headless: true,
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
 
   try {
     const page = await browser.newPage();
@@ -745,10 +734,13 @@ export async function buildSchoolDistributionMonthDocx(
         shading: challan,
         verticalMerge: VerticalMergeType.RESTART,
       }),
-      docxCell([pCell("গৃহীত খাদ্যসামগ্রী (পিস/প্যাকেট)", { bold: true, size: 10 })], {
-        shading: light,
-        columnSpan: 5,
-      }),
+      docxCell(
+        [pCell("গৃহীত খাদ্যসামগ্রী (পিস/প্যাকেট)", { bold: true, size: 10 })],
+        {
+          shading: light,
+          columnSpan: 5,
+        }
+      ),
       docxCell([pCell("গ্রহণকারীর\nস্বাক্ষর", { bold: true, size: 9 })], {
         shading: light,
         verticalMerge: VerticalMergeType.RESTART,
@@ -762,23 +754,41 @@ export async function buildSchoolDistributionMonthDocx(
 
   const headerRow2 = new TableRow({
     children: [
-      docxCell([new Paragraph("")], { shading: light, verticalMerge: VerticalMergeType.CONTINUE }),
-      docxCell([new Paragraph("")], { shading: light, verticalMerge: VerticalMergeType.CONTINUE }),
-      docxCell([new Paragraph("")], { shading: challan, verticalMerge: VerticalMergeType.CONTINUE }),
-      docxCell([new Paragraph("")], { shading: challan, verticalMerge: VerticalMergeType.CONTINUE }),
+      docxCell([new Paragraph("")], {
+        shading: light,
+        verticalMerge: VerticalMergeType.CONTINUE,
+      }),
+      docxCell([new Paragraph("")], {
+        shading: light,
+        verticalMerge: VerticalMergeType.CONTINUE,
+      }),
+      docxCell([new Paragraph("")], {
+        shading: challan,
+        verticalMerge: VerticalMergeType.CONTINUE,
+      }),
+      docxCell([new Paragraph("")], {
+        shading: challan,
+        verticalMerge: VerticalMergeType.CONTINUE,
+      }),
       docxCell([pCell("বনরুটি", { bold: true, size: 8 })], { shading: light }),
       docxCell([pCell("সিদ্ধ ডিম", { bold: true, size: 8 })], { shading: light }),
       docxCell([pCell("কলা", { bold: true, size: 8 })], { shading: light }),
       docxCell([pCell("ফর্টিফাইড বিস্কুট", { bold: true, size: 7 })], { shading: light }),
       docxCell([pCell("ইউএইচটি দুধ", { bold: true, size: 8 })], { shading: light }),
-      docxCell([new Paragraph("")], { shading: light, verticalMerge: VerticalMergeType.CONTINUE }),
-      docxCell([new Paragraph("")], { shading: light, verticalMerge: VerticalMergeType.CONTINUE }),
+      docxCell([new Paragraph("")], {
+        shading: light,
+        verticalMerge: VerticalMergeType.CONTINUE,
+      }),
+      docxCell([new Paragraph("")], {
+        shading: light,
+        verticalMerge: VerticalMergeType.CONTINUE,
+      }),
     ],
   });
 
   const indexRow = new TableRow({
-    children: ["১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯", "১০", "১১"].map((n) =>
-      docxCell([pCell(n, { bold: true, size: 11 })], { shading: green })
+    children: ["১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯", "১০", "১১"].map(
+      (n) => docxCell([pCell(n, { bold: true, size: 11 })], { shading: green })
     ),
   });
 
@@ -818,11 +828,21 @@ export async function buildSchoolDistributionMonthDocx(
         shading: totalFill,
         columnSpan: 4,
       }),
-      docxCell([pCell(payload.totals.banruti, { bold: true, size: 9 })], { shading: totalFill }),
-      docxCell([pCell(payload.totals.egg, { bold: true, size: 9 })], { shading: totalFill }),
-      docxCell([pCell(payload.totals.banana, { bold: true, size: 9 })], { shading: totalFill }),
-      docxCell([pCell(payload.totals.biscuit, { bold: true, size: 9 })], { shading: totalFill }),
-      docxCell([pCell(payload.totals.milk, { bold: true, size: 9 })], { shading: totalFill }),
+      docxCell([pCell(payload.totals.banruti, { bold: true, size: 9 })], {
+        shading: totalFill,
+      }),
+      docxCell([pCell(payload.totals.egg, { bold: true, size: 9 })], {
+        shading: totalFill,
+      }),
+      docxCell([pCell(payload.totals.banana, { bold: true, size: 9 })], {
+        shading: totalFill,
+      }),
+      docxCell([pCell(payload.totals.biscuit, { bold: true, size: 9 })], {
+        shading: totalFill,
+      }),
+      docxCell([pCell(payload.totals.milk, { bold: true, size: 9 })], {
+        shading: totalFill,
+      }),
       docxCell([pCell("", {})], { shading: totalFill }),
       docxCell([pCell("", {})], { shading: totalFill }),
     ],
@@ -947,36 +967,30 @@ export async function buildSchoolDistributionMonthDocx(
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({ text: "বিদ্যালয়ের নাম: ", bold: true, font: REPORT_FONT_FAMILY }),
-                        new TextRun({ text: payload.schoolNameBn, font: REPORT_FONT_FAMILY }),
+                        new TextRun({
+                          text: "বিদ্যালয়ের নাম: ",
+                          bold: true,
+                          font: REPORT_FONT_FAMILY,
+                        }),
+                        new TextRun({
+                          text: payload.schoolNameBn,
+                          font: REPORT_FONT_FAMILY,
+                        }),
                       ],
                     }),
                   ]),
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({ text: "EMIS কোড: ", bold: true, font: REPORT_FONT_FAMILY }),
-                        new TextRun({ text: payload.emisCode, font: REPORT_FONT_FAMILY }),
-                      ],
-                    }),
-                  ]),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  docxCell([
-                    new Paragraph({
-                      children: [
-                        new TextRun({ text: "জেলা: ", bold: true, font: REPORT_FONT_FAMILY }),
-                        new TextRun({ text: payload.district, font: REPORT_FONT_FAMILY }),
-                      ],
-                    }),
-                  ]),
-                  docxCell([
-                    new Paragraph({
-                      children: [
-                        new TextRun({ text: "উপজেলা: ", bold: true, font: REPORT_FONT_FAMILY }),
-                        new TextRun({ text: payload.upazila, font: REPORT_FONT_FAMILY }),
+                        new TextRun({
+                          text: "EMIS কোড: ",
+                          bold: true,
+                          font: REPORT_FONT_FAMILY,
+                        }),
+                        new TextRun({
+                          text: payload.emisCode,
+                          font: REPORT_FONT_FAMILY,
+                        }),
                       ],
                     }),
                   ]),
@@ -987,16 +1001,64 @@ export async function buildSchoolDistributionMonthDocx(
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({ text: "ইউনিয়ন: ", bold: true, font: REPORT_FONT_FAMILY }),
-                        new TextRun({ text: payload.union, font: REPORT_FONT_FAMILY }),
+                        new TextRun({
+                          text: "জেলা: ",
+                          bold: true,
+                          font: REPORT_FONT_FAMILY,
+                        }),
+                        new TextRun({
+                          text: payload.district,
+                          font: REPORT_FONT_FAMILY,
+                        }),
                       ],
                     }),
                   ]),
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({ text: "ক্লাস্টার: ", bold: true, font: REPORT_FONT_FAMILY }),
-                        new TextRun({ text: payload.cluster, font: REPORT_FONT_FAMILY }),
+                        new TextRun({
+                          text: "উপজেলা: ",
+                          bold: true,
+                          font: REPORT_FONT_FAMILY,
+                        }),
+                        new TextRun({
+                          text: payload.upazila,
+                          font: REPORT_FONT_FAMILY,
+                        }),
+                      ],
+                    }),
+                  ]),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  docxCell([
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "ইউনিয়ন: ",
+                          bold: true,
+                          font: REPORT_FONT_FAMILY,
+                        }),
+                        new TextRun({
+                          text: payload.union,
+                          font: REPORT_FONT_FAMILY,
+                        }),
+                      ],
+                    }),
+                  ]),
+                  docxCell([
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "ক্লাস্টার: ",
+                          bold: true,
+                          font: REPORT_FONT_FAMILY,
+                        }),
+                        new TextRun({
+                          text: payload.cluster,
+                          font: REPORT_FONT_FAMILY,
+                        }),
                       ],
                     }),
                   ]),
