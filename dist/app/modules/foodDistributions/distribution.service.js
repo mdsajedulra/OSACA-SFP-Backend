@@ -18,6 +18,7 @@ const distribution_model_1 = require("./distribution.model");
 const user_model_1 = require("../user/user.model");
 const mongoose_1 = require("mongoose");
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
+const distribution_report_1 = require("./distribution.report");
 // create distribution service function 
 const createDistribution = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const school = yield school_model_1.default.findById(payload.schoolId);
@@ -109,6 +110,12 @@ const getDistributionForBranchManager = (email) => __awaiter(void 0, void 0, voi
     console.log("Distribution found:", distribution.length);
     return distribution;
 });
+const getSchoolDistributionMonthlyReportService = (schoolId, month, year) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, distribution_report_1.getSchoolDistributionMonthlyReport)(schoolId, month, year);
+});
+const exportSchoolDistributionMonthlyReportService = (payload, format, period) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, distribution_report_1.exportSchoolDistributionMonthlyReport)(payload, format, period);
+});
 exports.distributionServices = {
     createDistribution,
     getAllDistributions,
@@ -116,7 +123,8 @@ exports.distributionServices = {
     updateDistributionById,
     deleteDistributionById,
     getDistributionBySchoolAndDate,
-    // get distribution for branch manager
     getDistributionForBranchManager,
-    getDistributionBySchoolIdLast
+    getDistributionBySchoolIdLast,
+    getSchoolDistributionMonthlyReport: getSchoolDistributionMonthlyReportService,
+    exportSchoolDistributionMonthlyReport: exportSchoolDistributionMonthlyReportService,
 };

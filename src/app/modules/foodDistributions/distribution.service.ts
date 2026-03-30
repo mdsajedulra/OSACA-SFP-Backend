@@ -5,6 +5,7 @@ import { FoodDistribution } from "./distribution.model";
 import { User } from "../user/user.model";
 import mongoose, { get, Types } from "mongoose";
 import moment from "moment-timezone";
+import { exportSchoolDistributionMonthlyReport, getSchoolDistributionMonthlyReport } from "./distribution.report";
 
 
 // create distribution service function 
@@ -52,8 +53,8 @@ const createDistribution = async (payload: IFoodDistribution) => {
 // get all distribution
 
 const getAllDistributions = async () => {
-    const distributions = await FoodDistribution.find().populate("schoolId").populate("upazilaId");
-    return distributions;
+  const distributions = await FoodDistribution.find().populate("schoolId").populate("upazilaId");
+  return distributions;
 }
 
 
@@ -61,27 +62,27 @@ const getAllDistributions = async () => {
 // get distribution by id
 
 const getDistributionById = async (id: ObjectId) => {
-    const distribution = await FoodDistribution.findById(id);
-    return distribution;
+  const distribution = await FoodDistribution.findById(id);
+  return distribution;
 }
 // update distribution by id
 
 
 const updateDistributionById = async (id: ObjectId, payload: Partial<IFoodDistribution>) => {
-    const distribution = await FoodDistribution.findByIdAndUpdate(id, payload, { new: true });
-    return distribution;
+  const distribution = await FoodDistribution.findByIdAndUpdate(id, payload, { new: true });
+  return distribution;
 }
 
 // delete distribution by id
 const deleteDistributionById = async (id: ObjectId) => {
-    await FoodDistribution.findByIdAndDelete(id);
-    return;
+  await FoodDistribution.findByIdAndDelete(id);
+  return;
 }
 
 // get distribution by school id and date 
 const getDistributionBySchoolAndDate = async (schoolId: ObjectId, date: Date) => {
-    const distribution = await FoodDistribution.findOne({ schoolId, date });
-    return distribution;
+  const distribution = await FoodDistribution.findOne({ schoolId, date });
+  return distribution;
 }
 
 
@@ -142,33 +143,35 @@ const getDistributionForBranchManager = async (email: string) => {
   return distribution;
 };
 
-const schoolReport = async (schoolId: string, month: number, year: number) => {
-  const startDate = new Date(year, month - 1, 1);
-  const endDate = new Date(year, month, 0, 23, 59, 59);
-
-  const data = await FoodDistribution.find({
-    schoolId: new Types.ObjectId(schoolId),
-    date: { $gte: startDate, $lte: endDate },
-    status: { $in: ["submitted", "confirmed"] },
-  })
-    .sort({ date: 1 })
-    .lean();
-console.log(data)
-  return data;
 
 
 
-}
+const getSchoolDistributionMonthlyReportService = async (
+  schoolId: string,
+  month: number,
+  year: number
+) => {
+  return getSchoolDistributionMonthlyReport(schoolId, month, year);
+};
+
+const exportSchoolDistributionMonthlyReportService = async (
+  payload: any,
+  format: "pdf" | "docx",
+  period: { year: number; month: number }
+) => {
+  return exportSchoolDistributionMonthlyReport(payload, format, period);
+};
+
 export const distributionServices = {
-    createDistribution,
-    getAllDistributions,
-    getDistributionById,
-    updateDistributionById,
-    deleteDistributionById,
-    getDistributionBySchoolAndDate,
+  createDistribution,
+  getAllDistributions,
+  getDistributionById,
+  updateDistributionById,
+  deleteDistributionById,
+  getDistributionBySchoolAndDate,
+  getDistributionForBranchManager,
+  getDistributionBySchoolIdLast,
 
-    // get distribution for branch manager
-    getDistributionForBranchManager,
-    getDistributionBySchoolIdLast,
-    schoolReport
-}
+  getSchoolDistributionMonthlyReport: getSchoolDistributionMonthlyReportService,
+  exportSchoolDistributionMonthlyReport: exportSchoolDistributionMonthlyReportService,
+};

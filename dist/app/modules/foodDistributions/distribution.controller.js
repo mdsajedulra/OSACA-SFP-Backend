@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.distributionController = void 0;
+exports.distributionController = exports.getSchoolDistributionReport = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const distribution_service_1 = require("./distribution.service");
+const mongoose_1 = require("mongoose");
 const createDistribution = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const distribution = yield distribution_service_1.distributionServices.createDistribution(req.body);
     (0, sendResponse_1.default)(res, {
@@ -88,6 +89,34 @@ const getDistributionForBranchManager = (0, catchAsync_1.default)((req, res) => 
         data: distributions,
     });
 }));
+// 
+exports.getSchoolDistributionReport = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const schoolId = String(req.params.schoolId);
+    const month = Number(req.query.month);
+    const year = Number(req.query.year);
+    const type = String((_a = req.query.type) !== null && _a !== void 0 ? _a : "").toLowerCase();
+    if (!mongoose_1.Types.ObjectId.isValid(schoolId)) {
+        throw new Error("Invalid schoolId");
+    }
+    if (!Number.isInteger(month) || month < 1 || month > 12) {
+        throw new Error('Query "month" must be an integer from 1 to 12');
+    }
+    if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+        throw new Error('Query "year" must be a valid year');
+    }
+    if (type !== "pdf" && type !== "docx") {
+        throw new Error('Query "type" must be pdf or docx');
+    }
+    const payload = yield distribution_service_1.distributionServices.getSchoolDistributionMonthlyReport(schoolId, month, year);
+    const { buffer, contentType, filename } = yield distribution_service_1.distributionServices.exportSchoolDistributionMonthlyReport(payload, type, { year, month });
+    const body = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+    res.status(http_status_codes_1.StatusCodes.OK);
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Length", String(body.length));
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    return res.end(body);
+}));
 exports.distributionController = {
     createDistribution,
     getDistributionById,
@@ -96,5 +125,6 @@ exports.distributionController = {
     deleteDistributionById,
     // get distribution for branch manager
     getDistributionForBranchManager,
-    getDistributionBySchoolIdLast
+    getDistributionBySchoolIdLast,
+    getSchoolDistributionReport: exports.getSchoolDistributionReport
 };
