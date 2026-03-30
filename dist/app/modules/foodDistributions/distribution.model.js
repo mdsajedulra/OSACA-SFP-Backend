@@ -54,9 +54,9 @@ const FoodItemSchema = new mongoose_1.Schema({
 }, { _id: false });
 // Main schema for food distribution 
 const FoodDistributionSchema = new mongoose_1.Schema({
-    uuid: {
+    challan: {
         type: String,
-        required: true,
+        required: false,
         unique: true,
         index: true,
     },

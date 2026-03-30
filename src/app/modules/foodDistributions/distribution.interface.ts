@@ -17,7 +17,7 @@ export type DistributionStatus =
 export interface IFoodDistribution {
   _id?: ObjectId;
 
-  uuid: string; // unique
+  challan?: string; // unique
 
   schoolId: ObjectId;
   

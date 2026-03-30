@@ -1,5 +1,3 @@
-import path from "path";
-import fs from "fs";
 import moment from "moment-timezone";
 import puppeteer from "puppeteer";
 import { Types } from "mongoose";
@@ -21,10 +19,6 @@ import {
 
 import { FoodDistribution } from "./distribution.model";
 import schoolModel from "../school/school.model";
-
-/* =========================
-   TYPES
-========================= */
 
 export type FoodColKey = "banruti" | "egg" | "banana" | "biscuit" | "milk";
 
@@ -63,10 +57,6 @@ export type OfficialMonthlyReportPayload = {
   };
 };
 
-/* =========================
-   CONSTANTS
-========================= */
-
 export const FORM_COLORS = {
   headerLight: "#D9D9D9",
   headerChallan: "#BFBFBF",
@@ -92,10 +82,6 @@ const MONTHS_BN = [
   "ডিসেম্বর",
 ];
 
-/* =========================
-   HELPERS
-========================= */
-
 export function toBengaliNumeralString(n: number | string): string {
   return String(n)
     .split("")
@@ -111,37 +97,41 @@ function resolveFoodColumn(food: string): FoodColKey | null {
   const f = String(food || "").toLowerCase().trim();
 
   if (
-    /বনরুটি|বানরুটি|banruti|bun|bread/i.test(food) ||
     f.includes("banruti") ||
-    f.includes("bun")
+    f.includes("bun") ||
+    f.includes("bread") ||
+    /বনরুটি|বানরুটি/.test(food)
   ) {
     return "banruti";
   }
 
   if (
-    /সিদ্ধ\s*ডিম|ডিম|egg|boiled/i.test(food) ||
-    f.includes("egg")
+    f.includes("egg") ||
+    f.includes("boiled") ||
+    /ডিম/.test(food)
   ) {
     return "egg";
   }
 
   if (
-    /কলা|banana|kola/i.test(food) ||
-    f.includes("banana")
+    f.includes("banana") ||
+    /কলা/.test(food)
   ) {
     return "banana";
   }
 
   if (
-    /বিস্কুট|biscuit|fortified/i.test(food) ||
-    f.includes("biscuit")
+    f.includes("biscuit") ||
+    f.includes("fortified") ||
+    /বিস্কুট/.test(food)
   ) {
     return "biscuit";
   }
 
   if (
-    /ইউএইচটি|uht|milk|দুধ/i.test(food) ||
-    f.includes("milk")
+    f.includes("milk") ||
+    f.includes("uht") ||
+    /দুধ/.test(food)
   ) {
     return "milk";
   }
@@ -159,10 +149,6 @@ function escapeHtml(text: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
-
-/* =========================
-   DATA PAYLOAD BUILDER
-========================= */
 
 export const getSchoolDistributionMonthlyReport = async (
   schoolId: string,
@@ -270,10 +256,15 @@ export const getSchoolDistributionMonthlyReport = async (
 
     for (const item of dist.items ?? []) {
       const k = resolveFoodColumn(item.food);
-      if (k) cols[k] += Number(item.received) || 0;
+      if (k) {
+        const received = Number(item.received) || 0;
+        const sent = Number(item.sent) || 0;
+        cols[k] += received > 0 ? received : sent;
+      }
     }
 
-    const challan = String(dist.uuid ?? "").replace(/-/g, "").slice(0, 14);
+    const challanSource = String((dist as any).challan ?? (dist as any).uuid ?? "");
+    const challan = challanSource.replace(/-/g, "").slice(0, 14);
 
     table.push({
       serialBn,
@@ -320,10 +311,6 @@ export const getSchoolDistributionMonthlyReport = async (
   };
 };
 
-/* =========================
-   PDF (PIXEL PERFECT)
-========================= */
-
 function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
   const rowsHtml = payload.table
     .map(
@@ -358,36 +345,51 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
       box-sizing: border-box;
     }
 
+    @page {
+      size: A4;
+      margin: 6mm;
+    }
+
+    html, body {
+      width: 210mm;
+      height: 297mm;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Noto Serif Bengali', serif;
-      margin: 0;
-      padding: 12mm 10mm;
       color: #000;
-      font-size: 10px;
-      line-height: 1.15;
+      font-size: 8.2px;
+      line-height: 1.05;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .page {
-      width: 100%;
+      width: 198mm;
+      height: 285mm;
+      margin: 0 auto;
+      overflow: hidden;
     }
 
     .title {
       text-align: center;
-      font-size: 18px;
+      font-size: 13px;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 1px;
     }
 
     .subtitle {
       text-align: center;
-      font-size: 15px;
-      margin-bottom: 6px;
+      font-size: 10.5px;
+      margin-bottom: 2px;
     }
 
     .period {
       text-align: center;
-      font-size: 14px;
-      margin-bottom: 10px;
+      font-size: 10px;
+      margin-bottom: 5px;
     }
 
     table {
@@ -396,11 +398,16 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
       table-layout: fixed;
     }
 
+    .info-table {
+      margin-bottom: 5px;
+    }
+
     .info-table td {
       border: 1px solid #000;
-      padding: 6px 8px;
+      padding: 4px 6px;
       vertical-align: middle;
-      font-size: 11px;
+      font-size: 8.6px;
+      height: 22px;
     }
 
     .label {
@@ -408,18 +415,23 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
     }
 
     .main-table {
-      margin-top: 10px;
       border: 1px solid #000;
     }
 
     .main-table th,
     .main-table td {
       border: 1px solid #000;
-      padding: 2px 3px;
+      padding: 1px 2px;
       text-align: center;
       vertical-align: middle;
       word-wrap: break-word;
       overflow-wrap: break-word;
+      font-size: 7.3px;
+      height: 16px;
+    }
+
+    .main-table thead th {
+      font-weight: 700;
     }
 
     .main-table .hlight {
@@ -440,26 +452,29 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
     .main-table .htotal td {
       background: ${FORM_COLORS.totalRow};
       font-weight: 700;
+      height: 18px;
     }
 
-    .left {
-      text-align: left;
+    .c { text-align: center; }
+    .l { text-align: left; }
+
+    .h1 th {
+      height: 28px;
+      font-size: 7.5px;
     }
 
-    .c {
-      text-align: center;
+    .h2 th {
+      height: 22px;
+      font-size: 7.1px;
     }
 
-    .l {
-      text-align: left;
-    }
-
-    .nowrap {
-      white-space: nowrap;
+    .h3 th {
+      height: 18px;
+      font-size: 7px;
     }
 
     .sign-wrap {
-      margin-top: 14px;
+      margin-top: 6px;
       width: 100%;
       border: 1px solid #000;
       border-bottom: none;
@@ -469,42 +484,41 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
     }
 
     .sign-box {
-      min-height: 112px;
+      min-height: 66px;
       border-right: 1px solid #000;
       border-bottom: 1px solid #000;
-      padding: 10px 10px 6px;
-      font-size: 11px;
+      padding: 6px 7px 4px;
+      font-size: 8px;
+      line-height: 1.15;
     }
 
     .sign-title {
       font-weight: 700;
-      margin-bottom: 18px;
+      margin-bottom: 8px;
     }
 
     .sign-line {
-      margin-top: 8px;
+      margin-top: 4px;
     }
 
-    .w1 { width: 5%; }
-    .w2 { width: 8%; }
-    .w3 { width: 8%; }
-    .w4 { width: 8%; }
-    .w5 { width: 6%; }
-    .w6 { width: 6%; }
-    .w7 { width: 6%; }
-    .w8 { width: 7%; }
-    .w9 { width: 6%; }
-    .w10 { width: 7%; }
-    .w11 { width: 8%; }
+    .w1  { width: 6.5%; }
+    .w2  { width: 10.5%; }
+    .w3  { width: 10.5%; }
+    .w4  { width: 10.5%; }
+    .w5  { width: 7.8%; }
+    .w6  { width: 7.8%; }
+    .w7  { width: 7.8%; }
+    .w8  { width: 9.2%; }
+    .w9  { width: 7.8%; }
+    .w10 { width: 9%; }
+    .w11 { width: 12.6%; }
   </style>
 </head>
 <body>
   <div class="page">
     <div class="title">সরকারি প্রাথমিক বিদ্যালয়ে ফিডিং কর্মসূচি</div>
     <div class="subtitle">বিদ্যালয়ে গৃহীত খাদ্যের মাসিক প্রতিবেদন</div>
-    <div class="period">মাস: ${escapeHtml(payload.monthBn)} &nbsp;&nbsp;&nbsp; সাল: ${escapeHtml(
-    payload.yearBn
-  )}</div>
+    <div class="period">মাস: ${escapeHtml(payload.monthBn)} &nbsp;&nbsp;&nbsp; সাল: ${escapeHtml(payload.yearBn)}</div>
 
     <table class="info-table">
       <tr>
@@ -536,7 +550,7 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
         <col class="w11" />
       </colgroup>
       <thead>
-        <tr>
+        <tr class="h1">
           <th class="hlight" rowspan="2">ক্রমিক<br/>নম্বর</th>
           <th class="hlight" rowspan="2">খাদ্য গ্রহণের তারিখ</th>
           <th class="hchallan" rowspan="2">চালান নম্বর</th>
@@ -545,14 +559,14 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
           <th class="hlight" rowspan="2">গ্রহণকারীর<br/>স্বাক্ষর</th>
           <th class="hlight" rowspan="2">মন্তব্য</th>
         </tr>
-        <tr>
+        <tr class="h2">
           <th class="hlight">বনরুটি</th>
           <th class="hlight">সিদ্ধ ডিম</th>
           <th class="hlight">কলা</th>
           <th class="hlight">ফর্টিফাইড বিস্কুট</th>
           <th class="hlight">ইউএইচটি দুধ</th>
         </tr>
-        <tr class="hgreen">
+        <tr class="h3 hgreen">
           <th>১</th>
           <th>২</th>
           <th>৩</th>
@@ -569,7 +583,7 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
       <tbody>
         ${rowsHtml}
         <tr class="htotal">
-          <td colspan="4" class="left">মোট</td>
+          <td colspan="4" class="l">মোট</td>
           <td>${escapeHtml(payload.totals.banruti)}</td>
           <td>${escapeHtml(payload.totals.egg)}</td>
           <td>${escapeHtml(payload.totals.banana)}</td>
@@ -623,6 +637,12 @@ export async function buildSchoolDistributionMonthPdf(
   try {
     const page = await browser.newPage();
 
+    await page.setViewport({
+      width: 1240,
+      height: 1754,
+      deviceScaleFactor: 1,
+    });
+
     await page.setContent(buildPdfHtml(payload), {
       waitUntil: "networkidle0",
     });
@@ -632,11 +652,12 @@ export async function buildSchoolDistributionMonthPdf(
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
+      preferCSSPageSize: true,
       margin: {
-        top: "8mm",
-        right: "8mm",
-        bottom: "8mm",
-        left: "8mm",
+        top: "0mm",
+        right: "0mm",
+        bottom: "0mm",
+        left: "0mm",
       },
     });
 
@@ -645,10 +666,6 @@ export async function buildSchoolDistributionMonthPdf(
     await browser.close();
   }
 }
-
-/* =========================
-   DOCX (CLOSE MATCH)
-========================= */
 
 const REPORT_FONT_FAMILY = "Nirmala UI";
 
@@ -744,35 +761,17 @@ export async function buildSchoolDistributionMonthDocx(
 
   const headerRow2 = new TableRow({
     children: [
-      docxCell([new Paragraph("")], {
-        shading: light,
-        verticalMerge: VerticalMergeType.CONTINUE,
-      }),
-      docxCell([new Paragraph("")], {
-        shading: light,
-        verticalMerge: VerticalMergeType.CONTINUE,
-      }),
-      docxCell([new Paragraph("")], {
-        shading: challan,
-        verticalMerge: VerticalMergeType.CONTINUE,
-      }),
-      docxCell([new Paragraph("")], {
-        shading: challan,
-        verticalMerge: VerticalMergeType.CONTINUE,
-      }),
+      docxCell([new Paragraph("")], { shading: light, verticalMerge: VerticalMergeType.CONTINUE }),
+      docxCell([new Paragraph("")], { shading: light, verticalMerge: VerticalMergeType.CONTINUE }),
+      docxCell([new Paragraph("")], { shading: challan, verticalMerge: VerticalMergeType.CONTINUE }),
+      docxCell([new Paragraph("")], { shading: challan, verticalMerge: VerticalMergeType.CONTINUE }),
       docxCell([pCell("বনরুটি", { bold: true, size: 8 })], { shading: light }),
       docxCell([pCell("সিদ্ধ ডিম", { bold: true, size: 8 })], { shading: light }),
       docxCell([pCell("কলা", { bold: true, size: 8 })], { shading: light }),
       docxCell([pCell("ফর্টিফাইড বিস্কুট", { bold: true, size: 7 })], { shading: light }),
       docxCell([pCell("ইউএইচটি দুধ", { bold: true, size: 8 })], { shading: light }),
-      docxCell([new Paragraph("")], {
-        shading: light,
-        verticalMerge: VerticalMergeType.CONTINUE,
-      }),
-      docxCell([new Paragraph("")], {
-        shading: light,
-        verticalMerge: VerticalMergeType.CONTINUE,
-      }),
+      docxCell([new Paragraph("")], { shading: light, verticalMerge: VerticalMergeType.CONTINUE }),
+      docxCell([new Paragraph("")], { shading: light, verticalMerge: VerticalMergeType.CONTINUE }),
     ],
   });
 
@@ -947,30 +946,16 @@ export async function buildSchoolDistributionMonthDocx(
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({
-                          text: "বিদ্যালয়ের নাম: ",
-                          bold: true,
-                          font: REPORT_FONT_FAMILY,
-                        }),
-                        new TextRun({
-                          text: payload.schoolNameBn,
-                          font: REPORT_FONT_FAMILY,
-                        }),
+                        new TextRun({ text: "বিদ্যালয়ের নাম: ", bold: true, font: REPORT_FONT_FAMILY }),
+                        new TextRun({ text: payload.schoolNameBn, font: REPORT_FONT_FAMILY }),
                       ],
                     }),
                   ]),
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({
-                          text: "EMIS কোড: ",
-                          bold: true,
-                          font: REPORT_FONT_FAMILY,
-                        }),
-                        new TextRun({
-                          text: payload.emisCode,
-                          font: REPORT_FONT_FAMILY,
-                        }),
+                        new TextRun({ text: "EMIS কোড: ", bold: true, font: REPORT_FONT_FAMILY }),
+                        new TextRun({ text: payload.emisCode, font: REPORT_FONT_FAMILY }),
                       ],
                     }),
                   ]),
@@ -981,30 +966,16 @@ export async function buildSchoolDistributionMonthDocx(
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({
-                          text: "জেলা: ",
-                          bold: true,
-                          font: REPORT_FONT_FAMILY,
-                        }),
-                        new TextRun({
-                          text: payload.district,
-                          font: REPORT_FONT_FAMILY,
-                        }),
+                        new TextRun({ text: "জেলা: ", bold: true, font: REPORT_FONT_FAMILY }),
+                        new TextRun({ text: payload.district, font: REPORT_FONT_FAMILY }),
                       ],
                     }),
                   ]),
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({
-                          text: "উপজেলা: ",
-                          bold: true,
-                          font: REPORT_FONT_FAMILY,
-                        }),
-                        new TextRun({
-                          text: payload.upazila,
-                          font: REPORT_FONT_FAMILY,
-                        }),
+                        new TextRun({ text: "উপজেলা: ", bold: true, font: REPORT_FONT_FAMILY }),
+                        new TextRun({ text: payload.upazila, font: REPORT_FONT_FAMILY }),
                       ],
                     }),
                   ]),
@@ -1015,30 +986,16 @@ export async function buildSchoolDistributionMonthDocx(
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({
-                          text: "ইউনিয়ন: ",
-                          bold: true,
-                          font: REPORT_FONT_FAMILY,
-                        }),
-                        new TextRun({
-                          text: payload.union,
-                          font: REPORT_FONT_FAMILY,
-                        }),
+                        new TextRun({ text: "ইউনিয়ন: ", bold: true, font: REPORT_FONT_FAMILY }),
+                        new TextRun({ text: payload.union, font: REPORT_FONT_FAMILY }),
                       ],
                     }),
                   ]),
                   docxCell([
                     new Paragraph({
                       children: [
-                        new TextRun({
-                          text: "ক্লাস্টার: ",
-                          bold: true,
-                          font: REPORT_FONT_FAMILY,
-                        }),
-                        new TextRun({
-                          text: payload.cluster,
-                          font: REPORT_FONT_FAMILY,
-                        }),
+                        new TextRun({ text: "ক্লাস্টার: ", bold: true, font: REPORT_FONT_FAMILY }),
+                        new TextRun({ text: payload.cluster, font: REPORT_FONT_FAMILY }),
                       ],
                     }),
                   ]),
@@ -1057,10 +1014,6 @@ export async function buildSchoolDistributionMonthDocx(
 
   return Buffer.from(await Packer.toBuffer(doc));
 }
-
-/* =========================
-   EXPORT HANDLER
-========================= */
 
 export const exportSchoolDistributionMonthlyReport = async (
   payload: OfficialMonthlyReportPayload,

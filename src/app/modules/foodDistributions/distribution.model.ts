@@ -29,9 +29,9 @@ const FoodItemSchema = new Schema(
 const FoodDistributionSchema = new Schema<IFoodDistribution>(
     {
 
-        uuid: {
+        challan: {
             type: String,
-            required: true,
+            required: false,
             unique: true,
             index: true,
 

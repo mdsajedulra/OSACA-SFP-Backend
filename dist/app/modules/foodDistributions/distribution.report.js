@@ -23,9 +23,6 @@ const mongoose_1 = require("mongoose");
 const docx_1 = require("docx");
 const distribution_model_1 = require("./distribution.model");
 const school_model_1 = __importDefault(require("../school/school.model"));
-/* =========================
-   CONSTANTS
-========================= */
 exports.FORM_COLORS = {
     headerLight: "#D9D9D9",
     headerChallan: "#BFBFBF",
@@ -48,9 +45,6 @@ const MONTHS_BN = [
     "নভেম্বর",
     "ডিসেম্বর",
 ];
-/* =========================
-   HELPERS
-========================= */
 function toBengaliNumeralString(n) {
     return String(n)
         .split("")
@@ -63,25 +57,29 @@ function monthNameBn(month1to12) {
 }
 function resolveFoodColumn(food) {
     const f = String(food || "").toLowerCase().trim();
-    if (/বনরুটি|বানরুটি|banruti|bun|bread/i.test(food) ||
-        f.includes("banruti") ||
-        f.includes("bun")) {
+    if (f.includes("banruti") ||
+        f.includes("bun") ||
+        f.includes("bread") ||
+        /বনরুটি|বানরুটি/.test(food)) {
         return "banruti";
     }
-    if (/সিদ্ধ\s*ডিম|ডিম|egg|boiled/i.test(food) ||
-        f.includes("egg")) {
+    if (f.includes("egg") ||
+        f.includes("boiled") ||
+        /ডিম/.test(food)) {
         return "egg";
     }
-    if (/কলা|banana|kola/i.test(food) ||
-        f.includes("banana")) {
+    if (f.includes("banana") ||
+        /কলা/.test(food)) {
         return "banana";
     }
-    if (/বিস্কুট|biscuit|fortified/i.test(food) ||
-        f.includes("biscuit")) {
+    if (f.includes("biscuit") ||
+        f.includes("fortified") ||
+        /বিস্কুট/.test(food)) {
         return "biscuit";
     }
-    if (/ইউএইচটি|uht|milk|দুধ/i.test(food) ||
-        f.includes("milk")) {
+    if (f.includes("milk") ||
+        f.includes("uht") ||
+        /দুধ/.test(food)) {
         return "milk";
     }
     return null;
@@ -95,11 +93,8 @@ function escapeHtml(text) {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 }
-/* =========================
-   DATA PAYLOAD BUILDER
-========================= */
 const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     if (!mongoose_1.Types.ObjectId.isValid(schoolId)) {
         throw new Error("Invalid school id");
     }
@@ -180,10 +175,14 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
         const cols = emptyFoodCols();
         for (const item of (_c = dist.items) !== null && _c !== void 0 ? _c : []) {
             const k = resolveFoodColumn(item.food);
-            if (k)
-                cols[k] += Number(item.received) || 0;
+            if (k) {
+                const received = Number(item.received) || 0;
+                const sent = Number(item.sent) || 0;
+                cols[k] += received > 0 ? received : sent;
+            }
         }
-        const challan = String((_d = dist.uuid) !== null && _d !== void 0 ? _d : "").replace(/-/g, "").slice(0, 14);
+        const challanSource = String((_e = (_d = dist.challan) !== null && _d !== void 0 ? _d : dist.uuid) !== null && _e !== void 0 ? _e : "");
+        const challan = challanSource.replace(/-/g, "").slice(0, 14);
         table.push({
             serialBn,
             receiptDate: receipt,
@@ -195,7 +194,7 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
             biscuit: cols.biscuit ? String(cols.biscuit) : "",
             milk: cols.milk ? String(cols.milk) : "",
             signature: "",
-            remark: (_f = (_e = dist.remark) === null || _e === void 0 ? void 0 : _e.trim()) !== null && _f !== void 0 ? _f : "",
+            remark: (_g = (_f = dist.remark) === null || _f === void 0 ? void 0 : _f.trim()) !== null && _g !== void 0 ? _g : "",
         });
     }
     const sumCols = emptyFoodCols();
@@ -209,9 +208,9 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
     return {
         schoolNameBn: school.schoolNameBangla || school.schoolName || "",
         emisCode: school.schoolCode || "",
-        district: (_h = (_g = school.address) === null || _g === void 0 ? void 0 : _g.district) !== null && _h !== void 0 ? _h : "",
+        district: (_j = (_h = school.address) === null || _h === void 0 ? void 0 : _h.district) !== null && _j !== void 0 ? _j : "",
         upazila: upazilaName,
-        union: (_k = (_j = school.address) === null || _j === void 0 ? void 0 : _j.union) !== null && _k !== void 0 ? _k : "",
+        union: (_l = (_k = school.address) === null || _k === void 0 ? void 0 : _k.union) !== null && _l !== void 0 ? _l : "",
         cluster: "",
         monthBn: monthNameBn(month),
         yearBn: toBengaliNumeralString(year),
@@ -228,9 +227,6 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
     };
 });
 exports.getSchoolDistributionMonthlyReport = getSchoolDistributionMonthlyReport;
-/* =========================
-   PDF (PIXEL PERFECT)
-========================= */
 function buildPdfHtml(payload) {
     const rowsHtml = payload.table
         .map((row) => `
@@ -262,36 +258,51 @@ function buildPdfHtml(payload) {
       box-sizing: border-box;
     }
 
+    @page {
+      size: A4;
+      margin: 6mm;
+    }
+
+    html, body {
+      width: 210mm;
+      height: 297mm;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Noto Serif Bengali', serif;
-      margin: 0;
-      padding: 12mm 10mm;
       color: #000;
-      font-size: 10px;
-      line-height: 1.15;
+      font-size: 8.2px;
+      line-height: 1.05;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .page {
-      width: 100%;
+      width: 198mm;
+      height: 285mm;
+      margin: 0 auto;
+      overflow: hidden;
     }
 
     .title {
       text-align: center;
-      font-size: 18px;
+      font-size: 13px;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 1px;
     }
 
     .subtitle {
       text-align: center;
-      font-size: 15px;
-      margin-bottom: 6px;
+      font-size: 10.5px;
+      margin-bottom: 2px;
     }
 
     .period {
       text-align: center;
-      font-size: 14px;
-      margin-bottom: 10px;
+      font-size: 10px;
+      margin-bottom: 5px;
     }
 
     table {
@@ -300,11 +311,16 @@ function buildPdfHtml(payload) {
       table-layout: fixed;
     }
 
+    .info-table {
+      margin-bottom: 5px;
+    }
+
     .info-table td {
       border: 1px solid #000;
-      padding: 6px 8px;
+      padding: 4px 6px;
       vertical-align: middle;
-      font-size: 11px;
+      font-size: 8.6px;
+      height: 22px;
     }
 
     .label {
@@ -312,18 +328,23 @@ function buildPdfHtml(payload) {
     }
 
     .main-table {
-      margin-top: 10px;
       border: 1px solid #000;
     }
 
     .main-table th,
     .main-table td {
       border: 1px solid #000;
-      padding: 2px 3px;
+      padding: 1px 2px;
       text-align: center;
       vertical-align: middle;
       word-wrap: break-word;
       overflow-wrap: break-word;
+      font-size: 7.3px;
+      height: 16px;
+    }
+
+    .main-table thead th {
+      font-weight: 700;
     }
 
     .main-table .hlight {
@@ -344,26 +365,29 @@ function buildPdfHtml(payload) {
     .main-table .htotal td {
       background: ${exports.FORM_COLORS.totalRow};
       font-weight: 700;
+      height: 18px;
     }
 
-    .left {
-      text-align: left;
+    .c { text-align: center; }
+    .l { text-align: left; }
+
+    .h1 th {
+      height: 28px;
+      font-size: 7.5px;
     }
 
-    .c {
-      text-align: center;
+    .h2 th {
+      height: 22px;
+      font-size: 7.1px;
     }
 
-    .l {
-      text-align: left;
-    }
-
-    .nowrap {
-      white-space: nowrap;
+    .h3 th {
+      height: 18px;
+      font-size: 7px;
     }
 
     .sign-wrap {
-      margin-top: 14px;
+      margin-top: 6px;
       width: 100%;
       border: 1px solid #000;
       border-bottom: none;
@@ -373,33 +397,34 @@ function buildPdfHtml(payload) {
     }
 
     .sign-box {
-      min-height: 112px;
+      min-height: 66px;
       border-right: 1px solid #000;
       border-bottom: 1px solid #000;
-      padding: 10px 10px 6px;
-      font-size: 11px;
+      padding: 6px 7px 4px;
+      font-size: 8px;
+      line-height: 1.15;
     }
 
     .sign-title {
       font-weight: 700;
-      margin-bottom: 18px;
+      margin-bottom: 8px;
     }
 
     .sign-line {
-      margin-top: 8px;
+      margin-top: 4px;
     }
 
-    .w1 { width: 5%; }
-    .w2 { width: 8%; }
-    .w3 { width: 8%; }
-    .w4 { width: 8%; }
-    .w5 { width: 6%; }
-    .w6 { width: 6%; }
-    .w7 { width: 6%; }
-    .w8 { width: 7%; }
-    .w9 { width: 6%; }
-    .w10 { width: 7%; }
-    .w11 { width: 8%; }
+    .w1  { width: 6.5%; }
+    .w2  { width: 10.5%; }
+    .w3  { width: 10.5%; }
+    .w4  { width: 10.5%; }
+    .w5  { width: 7.8%; }
+    .w6  { width: 7.8%; }
+    .w7  { width: 7.8%; }
+    .w8  { width: 9.2%; }
+    .w9  { width: 7.8%; }
+    .w10 { width: 9%; }
+    .w11 { width: 12.6%; }
   </style>
 </head>
 <body>
@@ -438,7 +463,7 @@ function buildPdfHtml(payload) {
         <col class="w11" />
       </colgroup>
       <thead>
-        <tr>
+        <tr class="h1">
           <th class="hlight" rowspan="2">ক্রমিক<br/>নম্বর</th>
           <th class="hlight" rowspan="2">খাদ্য গ্রহণের তারিখ</th>
           <th class="hchallan" rowspan="2">চালান নম্বর</th>
@@ -447,14 +472,14 @@ function buildPdfHtml(payload) {
           <th class="hlight" rowspan="2">গ্রহণকারীর<br/>স্বাক্ষর</th>
           <th class="hlight" rowspan="2">মন্তব্য</th>
         </tr>
-        <tr>
+        <tr class="h2">
           <th class="hlight">বনরুটি</th>
           <th class="hlight">সিদ্ধ ডিম</th>
           <th class="hlight">কলা</th>
           <th class="hlight">ফর্টিফাইড বিস্কুট</th>
           <th class="hlight">ইউএইচটি দুধ</th>
         </tr>
-        <tr class="hgreen">
+        <tr class="h3 hgreen">
           <th>১</th>
           <th>২</th>
           <th>৩</th>
@@ -471,7 +496,7 @@ function buildPdfHtml(payload) {
       <tbody>
         ${rowsHtml}
         <tr class="htotal">
-          <td colspan="4" class="left">মোট</td>
+          <td colspan="4" class="l">মোট</td>
           <td>${escapeHtml(payload.totals.banruti)}</td>
           <td>${escapeHtml(payload.totals.egg)}</td>
           <td>${escapeHtml(payload.totals.banana)}</td>
@@ -521,6 +546,11 @@ function buildSchoolDistributionMonthPdf(payload) {
         });
         try {
             const page = yield browser.newPage();
+            yield page.setViewport({
+                width: 1240,
+                height: 1754,
+                deviceScaleFactor: 1,
+            });
             yield page.setContent(buildPdfHtml(payload), {
                 waitUntil: "networkidle0",
             });
@@ -528,11 +558,12 @@ function buildSchoolDistributionMonthPdf(payload) {
             const pdf = yield page.pdf({
                 format: "A4",
                 printBackground: true,
+                preferCSSPageSize: true,
                 margin: {
-                    top: "8mm",
-                    right: "8mm",
-                    bottom: "8mm",
-                    left: "8mm",
+                    top: "0mm",
+                    right: "0mm",
+                    bottom: "0mm",
+                    left: "0mm",
                 },
             });
             return Buffer.from(pdf);
@@ -542,9 +573,6 @@ function buildSchoolDistributionMonthPdf(payload) {
         }
     });
 }
-/* =========================
-   DOCX (CLOSE MATCH)
-========================= */
 const REPORT_FONT_FAMILY = "Nirmala UI";
 const cellBorder = {
     top: { style: docx_1.BorderStyle.SINGLE, size: 1, color: "000000" },
@@ -619,35 +647,17 @@ function buildSchoolDistributionMonthDocx(payload) {
         });
         const headerRow2 = new docx_1.TableRow({
             children: [
-                docxCell([new docx_1.Paragraph("")], {
-                    shading: light,
-                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
-                }),
-                docxCell([new docx_1.Paragraph("")], {
-                    shading: light,
-                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
-                }),
-                docxCell([new docx_1.Paragraph("")], {
-                    shading: challan,
-                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
-                }),
-                docxCell([new docx_1.Paragraph("")], {
-                    shading: challan,
-                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
-                }),
+                docxCell([new docx_1.Paragraph("")], { shading: light, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
+                docxCell([new docx_1.Paragraph("")], { shading: light, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
+                docxCell([new docx_1.Paragraph("")], { shading: challan, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
+                docxCell([new docx_1.Paragraph("")], { shading: challan, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
                 docxCell([pCell("বনরুটি", { bold: true, size: 8 })], { shading: light }),
                 docxCell([pCell("সিদ্ধ ডিম", { bold: true, size: 8 })], { shading: light }),
                 docxCell([pCell("কলা", { bold: true, size: 8 })], { shading: light }),
                 docxCell([pCell("ফর্টিফাইড বিস্কুট", { bold: true, size: 7 })], { shading: light }),
                 docxCell([pCell("ইউএইচটি দুধ", { bold: true, size: 8 })], { shading: light }),
-                docxCell([new docx_1.Paragraph("")], {
-                    shading: light,
-                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
-                }),
-                docxCell([new docx_1.Paragraph("")], {
-                    shading: light,
-                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
-                }),
+                docxCell([new docx_1.Paragraph("")], { shading: light, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
+                docxCell([new docx_1.Paragraph("")], { shading: light, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
             ],
         });
         const indexRow = new docx_1.TableRow({
@@ -794,30 +804,16 @@ function buildSchoolDistributionMonthDocx(payload) {
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({
-                                                        text: "বিদ্যালয়ের নাম: ",
-                                                        bold: true,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
-                                                    new docx_1.TextRun({
-                                                        text: payload.schoolNameBn,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
+                                                    new docx_1.TextRun({ text: "বিদ্যালয়ের নাম: ", bold: true, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({ text: payload.schoolNameBn, font: REPORT_FONT_FAMILY }),
                                                 ],
                                             }),
                                         ]),
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({
-                                                        text: "EMIS কোড: ",
-                                                        bold: true,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
-                                                    new docx_1.TextRun({
-                                                        text: payload.emisCode,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
+                                                    new docx_1.TextRun({ text: "EMIS কোড: ", bold: true, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({ text: payload.emisCode, font: REPORT_FONT_FAMILY }),
                                                 ],
                                             }),
                                         ]),
@@ -828,30 +824,16 @@ function buildSchoolDistributionMonthDocx(payload) {
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({
-                                                        text: "জেলা: ",
-                                                        bold: true,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
-                                                    new docx_1.TextRun({
-                                                        text: payload.district,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
+                                                    new docx_1.TextRun({ text: "জেলা: ", bold: true, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({ text: payload.district, font: REPORT_FONT_FAMILY }),
                                                 ],
                                             }),
                                         ]),
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({
-                                                        text: "উপজেলা: ",
-                                                        bold: true,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
-                                                    new docx_1.TextRun({
-                                                        text: payload.upazila,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
+                                                    new docx_1.TextRun({ text: "উপজেলা: ", bold: true, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({ text: payload.upazila, font: REPORT_FONT_FAMILY }),
                                                 ],
                                             }),
                                         ]),
@@ -862,30 +844,16 @@ function buildSchoolDistributionMonthDocx(payload) {
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({
-                                                        text: "ইউনিয়ন: ",
-                                                        bold: true,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
-                                                    new docx_1.TextRun({
-                                                        text: payload.union,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
+                                                    new docx_1.TextRun({ text: "ইউনিয়ন: ", bold: true, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({ text: payload.union, font: REPORT_FONT_FAMILY }),
                                                 ],
                                             }),
                                         ]),
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({
-                                                        text: "ক্লাস্টার: ",
-                                                        bold: true,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
-                                                    new docx_1.TextRun({
-                                                        text: payload.cluster,
-                                                        font: REPORT_FONT_FAMILY,
-                                                    }),
+                                                    new docx_1.TextRun({ text: "ক্লাস্টার: ", bold: true, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({ text: payload.cluster, font: REPORT_FONT_FAMILY }),
                                                 ],
                                             }),
                                         ]),
@@ -904,9 +872,6 @@ function buildSchoolDistributionMonthDocx(payload) {
         return Buffer.from(yield docx_1.Packer.toBuffer(doc));
     });
 }
-/* =========================
-   EXPORT HANDLER
-========================= */
 const exportSchoolDistributionMonthlyReport = (payload, format, period) => __awaiter(void 0, void 0, void 0, function* () {
     const safeCode = payload.emisCode.replace(/[^a-zA-Z0-9-_]/g, "_");
     const ym = `${period.year}-${String(period.month).padStart(2, "0")}`;
