@@ -63,13 +63,10 @@ function resolveFoodColumn(food) {
         /বনরুটি|বানরুটি/.test(food)) {
         return "banruti";
     }
-    if (f.includes("egg") ||
-        f.includes("boiled") ||
-        /ডিম/.test(food)) {
+    if (f.includes("egg") || f.includes("boiled") || /ডিম/.test(food)) {
         return "egg";
     }
-    if (f.includes("banana") ||
-        /কলা/.test(food)) {
+    if (f.includes("banana") || /কলা/.test(food)) {
         return "banana";
     }
     if (f.includes("biscuit") ||
@@ -77,9 +74,7 @@ function resolveFoodColumn(food) {
         /বিস্কুট/.test(food)) {
         return "biscuit";
     }
-    if (f.includes("milk") ||
-        f.includes("uht") ||
-        /দুধ/.test(food)) {
+    if (f.includes("milk") || f.includes("uht") || /দুধ/.test(food)) {
         return "milk";
     }
     return null;
@@ -94,7 +89,7 @@ function escapeHtml(text) {
         .replace(/>/g, "&gt;");
 }
 const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     if (!mongoose_1.Types.ObjectId.isValid(schoolId)) {
         throw new Error("Invalid school id");
     }
@@ -122,39 +117,13 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
         date: { $gte: start, $lte: end },
         status: { $in: ["submitted", "confirmed"] },
     })
-        .sort({ date: 1 })
+        .sort({ date: 1, createdAt: 1 })
         .lean();
-    const byDate = new Map();
-    for (const d of distributions) {
-        const key = (0, moment_timezone_1.default)(d.date).tz("Asia/Dhaka").format("YYYY-MM-DD");
-        byDate.set(key, d);
-    }
-    const daysInMonth = moment_timezone_1.default
-        .tz({ year, month: month - 1, day: 1 }, "Asia/Dhaka")
-        .daysInMonth();
     const table = [];
-    for (let day = 1; day <= 30; day++) {
-        const serialBn = toBengaliNumeralString(day);
-        if (day > daysInMonth) {
-            table.push({
-                serialBn,
-                receiptDate: "",
-                challanNo: "",
-                challanDate: "",
-                banruti: "",
-                egg: "",
-                banana: "",
-                biscuit: "",
-                milk: "",
-                signature: "",
-                remark: "",
-            });
-            continue;
-        }
-        const key = moment_timezone_1.default
-            .tz({ year, month: month - 1, day }, "Asia/Dhaka")
-            .format("YYYY-MM-DD");
-        const dist = byDate.get(key);
+    // সবসময় 31 row
+    for (let index = 0; index < 31; index++) {
+        const serialBn = toBengaliNumeralString(index + 1);
+        const dist = distributions[index];
         if (!dist) {
             table.push({
                 serialBn,
@@ -181,8 +150,7 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
                 cols[k] += received > 0 ? received : sent;
             }
         }
-        const challanSource = String((_e = (_d = dist.challan) !== null && _d !== void 0 ? _d : dist.uuid) !== null && _e !== void 0 ? _e : "");
-        const challan = challanSource.replace(/-/g, "").slice(0, 14);
+        const challan = String((_d = dist.challan) !== null && _d !== void 0 ? _d : "");
         table.push({
             serialBn,
             receiptDate: receipt,
@@ -194,7 +162,7 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
             biscuit: cols.biscuit ? String(cols.biscuit) : "",
             milk: cols.milk ? String(cols.milk) : "",
             signature: "",
-            remark: (_g = (_f = dist.remark) === null || _f === void 0 ? void 0 : _f.trim()) !== null && _g !== void 0 ? _g : "",
+            remark: (_f = (_e = dist.remark) === null || _e === void 0 ? void 0 : _e.trim()) !== null && _f !== void 0 ? _f : "",
         });
     }
     const sumCols = emptyFoodCols();
@@ -207,15 +175,15 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
     }
     return {
         schoolNameBn: school.schoolNameBangla || school.schoolName || "",
-        emisCode: school.schoolCode || "",
-        district: (_j = (_h = school.address) === null || _h === void 0 ? void 0 : _h.district) !== null && _j !== void 0 ? _j : "",
+        emisCode: toBengaliNumeralString(school.schoolCode || ""),
+        district: (_h = (_g = school.address) === null || _g === void 0 ? void 0 : _g.district) !== null && _h !== void 0 ? _h : "",
         upazila: upazilaName,
-        union: (_l = (_k = school.address) === null || _k === void 0 ? void 0 : _k.union) !== null && _l !== void 0 ? _l : "",
+        union: (_k = (_j = school.address) === null || _j === void 0 ? void 0 : _j.union) !== null && _k !== void 0 ? _k : "",
         cluster: "",
         monthBn: monthNameBn(month),
         yearBn: toBengaliNumeralString(year),
         headTeacherPhoneNumber: school.headTeacherPhoneNumber || "",
-        tifinManagerNumber: school.tifinManagerPNumber || "",
+        tifinManagerNumber: school.tifinManagerNumber || school.tifinManagerPNumber || "",
         table,
         totals: {
             banruti: sumCols.banruti ? String(sumCols.banruti) : "",
@@ -542,7 +510,7 @@ function buildSchoolDistributionMonthPdf(payload) {
     return __awaiter(this, void 0, void 0, function* () {
         const browser = yield puppeteer_1.default.launch({
             headless: true,
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
         try {
@@ -648,17 +616,35 @@ function buildSchoolDistributionMonthDocx(payload) {
         });
         const headerRow2 = new docx_1.TableRow({
             children: [
-                docxCell([new docx_1.Paragraph("")], { shading: light, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
-                docxCell([new docx_1.Paragraph("")], { shading: light, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
-                docxCell([new docx_1.Paragraph("")], { shading: challan, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
-                docxCell([new docx_1.Paragraph("")], { shading: challan, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
+                docxCell([new docx_1.Paragraph("")], {
+                    shading: light,
+                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
+                }),
+                docxCell([new docx_1.Paragraph("")], {
+                    shading: light,
+                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
+                }),
+                docxCell([new docx_1.Paragraph("")], {
+                    shading: challan,
+                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
+                }),
+                docxCell([new docx_1.Paragraph("")], {
+                    shading: challan,
+                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
+                }),
                 docxCell([pCell("বনরুটি", { bold: true, size: 8 })], { shading: light }),
                 docxCell([pCell("সিদ্ধ ডিম", { bold: true, size: 8 })], { shading: light }),
                 docxCell([pCell("কলা", { bold: true, size: 8 })], { shading: light }),
                 docxCell([pCell("ফর্টিফাইড বিস্কুট", { bold: true, size: 7 })], { shading: light }),
                 docxCell([pCell("ইউএইচটি দুধ", { bold: true, size: 8 })], { shading: light }),
-                docxCell([new docx_1.Paragraph("")], { shading: light, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
-                docxCell([new docx_1.Paragraph("")], { shading: light, verticalMerge: docx_1.VerticalMergeType.CONTINUE }),
+                docxCell([new docx_1.Paragraph("")], {
+                    shading: light,
+                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
+                }),
+                docxCell([new docx_1.Paragraph("")], {
+                    shading: light,
+                    verticalMerge: docx_1.VerticalMergeType.CONTINUE,
+                }),
             ],
         });
         const indexRow = new docx_1.TableRow({
@@ -693,11 +679,21 @@ function buildSchoolDistributionMonthDocx(payload) {
                     shading: totalFill,
                     columnSpan: 4,
                 }),
-                docxCell([pCell(payload.totals.banruti, { bold: true, size: 9 })], { shading: totalFill }),
-                docxCell([pCell(payload.totals.egg, { bold: true, size: 9 })], { shading: totalFill }),
-                docxCell([pCell(payload.totals.banana, { bold: true, size: 9 })], { shading: totalFill }),
-                docxCell([pCell(payload.totals.biscuit, { bold: true, size: 9 })], { shading: totalFill }),
-                docxCell([pCell(payload.totals.milk, { bold: true, size: 9 })], { shading: totalFill }),
+                docxCell([pCell(payload.totals.banruti, { bold: true, size: 9 })], {
+                    shading: totalFill,
+                }),
+                docxCell([pCell(payload.totals.egg, { bold: true, size: 9 })], {
+                    shading: totalFill,
+                }),
+                docxCell([pCell(payload.totals.banana, { bold: true, size: 9 })], {
+                    shading: totalFill,
+                }),
+                docxCell([pCell(payload.totals.biscuit, { bold: true, size: 9 })], {
+                    shading: totalFill,
+                }),
+                docxCell([pCell(payload.totals.milk, { bold: true, size: 9 })], {
+                    shading: totalFill,
+                }),
                 docxCell([pCell("", {})], { shading: totalFill }),
                 docxCell([pCell("", {})], { shading: totalFill }),
             ],
@@ -805,36 +801,30 @@ function buildSchoolDistributionMonthDocx(payload) {
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({ text: "বিদ্যালয়ের নাম: ", bold: true, font: REPORT_FONT_FAMILY }),
-                                                    new docx_1.TextRun({ text: payload.schoolNameBn, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({
+                                                        text: "বিদ্যালয়ের নাম: ",
+                                                        bold: true,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
+                                                    new docx_1.TextRun({
+                                                        text: payload.schoolNameBn,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
                                                 ],
                                             }),
                                         ]),
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({ text: "EMIS কোড: ", bold: true, font: REPORT_FONT_FAMILY }),
-                                                    new docx_1.TextRun({ text: payload.emisCode, font: REPORT_FONT_FAMILY }),
-                                                ],
-                                            }),
-                                        ]),
-                                    ],
-                                }),
-                                new docx_1.TableRow({
-                                    children: [
-                                        docxCell([
-                                            new docx_1.Paragraph({
-                                                children: [
-                                                    new docx_1.TextRun({ text: "জেলা: ", bold: true, font: REPORT_FONT_FAMILY }),
-                                                    new docx_1.TextRun({ text: payload.district, font: REPORT_FONT_FAMILY }),
-                                                ],
-                                            }),
-                                        ]),
-                                        docxCell([
-                                            new docx_1.Paragraph({
-                                                children: [
-                                                    new docx_1.TextRun({ text: "উপজেলা: ", bold: true, font: REPORT_FONT_FAMILY }),
-                                                    new docx_1.TextRun({ text: payload.upazila, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({
+                                                        text: "EMIS কোড: ",
+                                                        bold: true,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
+                                                    new docx_1.TextRun({
+                                                        text: payload.emisCode,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
                                                 ],
                                             }),
                                         ]),
@@ -845,16 +835,64 @@ function buildSchoolDistributionMonthDocx(payload) {
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({ text: "ইউনিয়ন: ", bold: true, font: REPORT_FONT_FAMILY }),
-                                                    new docx_1.TextRun({ text: payload.union, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({
+                                                        text: "জেলা: ",
+                                                        bold: true,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
+                                                    new docx_1.TextRun({
+                                                        text: payload.district,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
                                                 ],
                                             }),
                                         ]),
                                         docxCell([
                                             new docx_1.Paragraph({
                                                 children: [
-                                                    new docx_1.TextRun({ text: "ক্লাস্টার: ", bold: true, font: REPORT_FONT_FAMILY }),
-                                                    new docx_1.TextRun({ text: payload.cluster, font: REPORT_FONT_FAMILY }),
+                                                    new docx_1.TextRun({
+                                                        text: "উপজেলা: ",
+                                                        bold: true,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
+                                                    new docx_1.TextRun({
+                                                        text: payload.upazila,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
+                                                ],
+                                            }),
+                                        ]),
+                                    ],
+                                }),
+                                new docx_1.TableRow({
+                                    children: [
+                                        docxCell([
+                                            new docx_1.Paragraph({
+                                                children: [
+                                                    new docx_1.TextRun({
+                                                        text: "ইউনিয়ন: ",
+                                                        bold: true,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
+                                                    new docx_1.TextRun({
+                                                        text: payload.union,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
+                                                ],
+                                            }),
+                                        ]),
+                                        docxCell([
+                                            new docx_1.Paragraph({
+                                                children: [
+                                                    new docx_1.TextRun({
+                                                        text: "ক্লাস্টার: ",
+                                                        bold: true,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
+                                                    new docx_1.TextRun({
+                                                        text: payload.cluster,
+                                                        font: REPORT_FONT_FAMILY,
+                                                    }),
                                                 ],
                                             }),
                                         ]),

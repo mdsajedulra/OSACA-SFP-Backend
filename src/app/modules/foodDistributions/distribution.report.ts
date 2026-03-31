@@ -182,46 +182,15 @@ export const getSchoolDistributionMonthlyReport = async (
     date: { $gte: start, $lte: end },
     status: { $in: ["submitted", "confirmed"] },
   })
-    .sort({ date: 1 })
+    .sort({ date: 1, createdAt: 1 })
     .lean();
-
-  const byDate = new Map<string, (typeof distributions)[0]>();
-  for (const d of distributions) {
-    const key = moment(d.date).tz("Asia/Dhaka").format("YYYY-MM-DD");
-    byDate.set(key, d);
-  }
-
-  const daysInMonth = moment
-    .tz({ year, month: month - 1, day: 1 }, "Asia/Dhaka")
-    .daysInMonth();
 
   const table: OfficialReportTableRow[] = [];
 
-  for (let day = 1; day <= 30; day++) {
-    const serialBn = toBengaliNumeralString(day);
-
-    if (day > daysInMonth) {
-      table.push({
-        serialBn,
-        receiptDate: "",
-        challanNo: "",
-        challanDate: "",
-        banruti: "",
-        egg: "",
-        banana: "",
-        biscuit: "",
-        milk: "",
-        signature: "",
-        remark: "",
-      });
-      continue;
-    }
-
-    const key = moment
-      .tz({ year, month: month - 1, day }, "Asia/Dhaka")
-      .format("YYYY-MM-DD");
-
-    const dist = byDate.get(key);
+  // সবসময় 31 row
+  for (let index = 0; index < 31; index++) {
+    const serialBn = toBengaliNumeralString(index + 1);
+    const dist = distributions[index];
 
     if (!dist) {
       table.push({
