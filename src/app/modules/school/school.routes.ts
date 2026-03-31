@@ -10,6 +10,8 @@ const upload = multer({ dest: "uploads/" });
 schoolRouter.post("/", schoolController.createSchool);
 schoolRouter.post("/bulk", upload.single("file"), schoolController.bulkSchool);
 schoolRouter.get("/", schoolController.getAllSchool);
+schoolRouter.get("/:schoolId", schoolController.getAllSchool);
+
 schoolRouter.patch("/:id", schoolController.updateSchool);
 schoolRouter.post("/school-login", schoolController.schoolLogin);
 schoolRouter.get("/branch-manager", auth("upazilaManager"), schoolController.getSchoolForBranchManager);

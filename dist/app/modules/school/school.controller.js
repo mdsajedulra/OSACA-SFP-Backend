@@ -113,11 +113,23 @@ const getSchoolForBranchManager = (0, catchAsync_1.default)((req, res) => __awai
         data: result,
     });
 }));
+// get school by id
+const getSchoolById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const schoolId = req.params.schoolId;
+    const result = yield school_service_1.schoolService.getSchoolById(schoolId);
+    (0, sendResponse_1.default)(res, {
+        message: "School retrieved successfully",
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        success: true,
+        data: result,
+    });
+}));
 exports.schoolController = {
     createSchool,
     schoolLogin,
     getAllSchool,
     updateSchool,
     bulkSchool,
-    getSchoolForBranchManager
+    getSchoolForBranchManager,
+    getSchoolById
 };

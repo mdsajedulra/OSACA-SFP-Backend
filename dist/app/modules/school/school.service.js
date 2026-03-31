@@ -63,11 +63,17 @@ const getSchoolForBranchManager = (email) => __awaiter(void 0, void 0, void 0, f
     }).populate('address.upazilaId').populate('address.upazilaId');
     return school;
 });
+// get school by id
+const getSchoolById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const school = yield school_model_1.default.findById(id);
+    return school;
+});
 exports.schoolService = {
     createSchool,
     schoolLogin,
     getAllSchool,
     updateSchool,
     bulkSchool,
-    getSchoolForBranchManager
+    getSchoolForBranchManager,
+    getSchoolById
 };

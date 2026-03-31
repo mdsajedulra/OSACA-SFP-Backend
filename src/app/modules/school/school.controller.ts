@@ -150,6 +150,18 @@ const getSchoolForBranchManager = catchAsync(async (req, res) => {
     });
 });
 
+// get school by id
+
+const getSchoolById = catchAsync(async (req, res) => {
+  const schoolId = req.params.schoolId as unknown as ObjectId;
+  const result = await schoolService.getSchoolById(schoolId);
+  sendResponse(res, {
+    message: "School retrieved successfully",
+    statusCode: StatusCodes.OK,
+    success: true,
+    data: result,
+  });
+});
 
 
 
@@ -162,5 +174,6 @@ export const schoolController = {
   getAllSchool,
   updateSchool,
   bulkSchool,
-  getSchoolForBranchManager
+  getSchoolForBranchManager,
+  getSchoolById
 };

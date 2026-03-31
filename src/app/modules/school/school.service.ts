@@ -67,6 +67,12 @@ const getSchoolForBranchManager = async (email: string) => {
     return school;
 }
 
+// get school by id
+
+const getSchoolById = async (id: ObjectId) => {
+  const school = await schoolModel.findById(id);
+  return school;
+}
 
 
 
@@ -81,5 +87,6 @@ export const schoolService = {
   getAllSchool,
   updateSchool,
   bulkSchool,
-  getSchoolForBranchManager
+  getSchoolForBranchManager,
+  getSchoolById
 };
