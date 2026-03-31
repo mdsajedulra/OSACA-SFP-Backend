@@ -10,7 +10,7 @@ const upload = multer({ dest: "uploads/" });
 schoolRouter.post("/", schoolController.createSchool);
 schoolRouter.post("/bulk", upload.single("file"), schoolController.bulkSchool);
 schoolRouter.get("/", schoolController.getAllSchool);
-schoolRouter.get("/:schoolId", schoolController.getAllSchool);
+schoolRouter.get("/:schoolId", schoolController.getSchoolById);
 
 schoolRouter.patch("/:id", schoolController.updateSchool);
 schoolRouter.post("/school-login", schoolController.schoolLogin);
