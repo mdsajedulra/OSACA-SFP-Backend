@@ -9,51 +9,45 @@ const routes_1 = __importDefault(require("./app/routes"));
 const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
 const globalErrorHandler_1 = require("./app/middlewares/globalErrorHandler");
 const app = (0, express_1.default)();
+// trust proxy (hosting / reverse proxy থাকলে helpful)
+app.set("trust proxy", 1);
+// body parser
 app.use(express_1.default.json());
-// ✅ allowed origins
-const allowedOrigins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://localhost:8081",
-    "https://lovable.dev",
-    "https://admin-dashboard-gamma-inky-62.vercel.app",
-    "https://school-snack-stats.lovable.app",
-    "https://sfp.osacabd.org",
-];
-// ✅ CORS setup (safe + flexible)
-app.use((0, cors_1.default)({
-    origin: (origin, callback) => {
-        // allow mobile app / postman
-        if (!origin)
-            return callback(null, true);
-        // allow localhost সব port
-        if (origin.startsWith("http://localhost")) {
-            return callback(null, true);
-        }
-        // allow local network
-        if (origin.startsWith("http://192.168")) {
-            return callback(null, true);
-        }
-        // allow specific domains
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-        // block others
-        return callback(new Error("CORS blocked: " + origin));
-    },
+app.use(express_1.default.urlencoded({ extended: true }));
+// stable cors config
+const corsOptions = {
+    origin: true, // request origin automatically allow
     credentials: true,
-}));
-// ❌ REMOVE this line (this was causing error)
-// app.options("*", cors());
-// ✅ routes
-app.use("/api/v1", routes_1.default);
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 204,
+};
+// request log
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} | origin: ${req.headers.origin || "no-origin"}`);
+    next();
+});
+// cors must come before routes
+app.use((0, cors_1.default)(corsOptions));
+// preflight handle
+app.options(/.*/, (0, cors_1.default)(corsOptions));
+// health check
 app.get("/", (req, res) => {
     res.status(200).json({
         success: true,
         message: "Welcome to osaca Careers",
     });
 });
-// ✅ error handlers
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Server is running",
+        time: new Date().toISOString(),
+    });
+});
+// api routes
+app.use("/api/v1", routes_1.default);
+// error handlers
 app.use(globalErrorHandler_1.globalErrorHandler);
 app.use(notFound_1.default);
 exports.default = app;

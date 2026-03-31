@@ -24,10 +24,10 @@ const docx_1 = require("docx");
 const distribution_model_1 = require("./distribution.model");
 const school_model_1 = __importDefault(require("../school/school.model"));
 exports.FORM_COLORS = {
-    headerLight: "#D9D9D9",
-    headerChallan: "#BFBFBF",
-    indexGreen: "#D9EAD3",
-    totalRow: "#D9D9D9",
+    headerLight: "#D0D0D0",
+    headerChallan: "#D0D0D0",
+    indexGreen: "#DDE9D4",
+    totalRow: "#D0D0D0",
 };
 const BN_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
 const MONTHS_BN = [
@@ -54,6 +54,19 @@ function toBengaliNumeralString(n) {
 function monthNameBn(month1to12) {
     var _a;
     return (_a = MONTHS_BN[month1to12]) !== null && _a !== void 0 ? _a : "";
+}
+function toBanglaText(value) {
+    if (value === null || value === undefined)
+        return "";
+    return toBengaliNumeralString(String(value));
+}
+function toBanglaDate(date) {
+    return toBengaliNumeralString((0, moment_timezone_1.default)(date).tz("Asia/Dhaka").format("DD/MM/YYYY"));
+}
+function toBanglaMixedText(value) {
+    if (!value)
+        return "";
+    return String(value).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
 }
 function resolveFoodColumn(food) {
     const f = String(food || "").toLowerCase().trim();
@@ -88,6 +101,21 @@ function escapeHtml(text) {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 }
+function banglaToEnglishDigits(value) {
+    const map = {
+        "০": "0",
+        "১": "1",
+        "২": "2",
+        "৩": "3",
+        "৪": "4",
+        "৫": "5",
+        "৬": "6",
+        "৭": "7",
+        "৮": "8",
+        "৯": "9",
+    };
+    return String(value || "").replace(/[০-৯]/g, (d) => { var _a; return (_a = map[d]) !== null && _a !== void 0 ? _a : d; });
+}
 const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     if (!mongoose_1.Types.ObjectId.isValid(schoolId)) {
@@ -120,7 +148,6 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
         .sort({ date: 1, createdAt: 1 })
         .lean();
     const table = [];
-    // সবসময় 31 row
     for (let index = 0; index < 31; index++) {
         const serialBn = toBengaliNumeralString(index + 1);
         const dist = distributions[index];
@@ -140,7 +167,7 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
             });
             continue;
         }
-        const receipt = (0, moment_timezone_1.default)(dist.date).tz("Asia/Dhaka").format("DD/MM/YYYY");
+        const receipt = toBanglaDate(dist.date);
         const cols = emptyFoodCols();
         for (const item of (_c = dist.items) !== null && _c !== void 0 ? _c : []) {
             const k = resolveFoodColumn(item.food);
@@ -150,47 +177,50 @@ const getSchoolDistributionMonthlyReport = (schoolId, month, year) => __awaiter(
                 cols[k] += received > 0 ? received : sent;
             }
         }
-        const challan = String((_d = dist.challan) !== null && _d !== void 0 ? _d : "");
+        const challan = toBanglaMixedText(String((_d = dist.challan) !== null && _d !== void 0 ? _d : ""));
         table.push({
             serialBn,
             receiptDate: receipt,
             challanNo: challan,
             challanDate: receipt,
-            banruti: cols.banruti ? String(cols.banruti) : "",
-            egg: cols.egg ? String(cols.egg) : "",
-            banana: cols.banana ? String(cols.banana) : "",
-            biscuit: cols.biscuit ? String(cols.biscuit) : "",
-            milk: cols.milk ? String(cols.milk) : "",
+            banruti: cols.banruti ? toBanglaText(cols.banruti) : "",
+            egg: cols.egg ? toBanglaText(cols.egg) : "",
+            banana: cols.banana ? toBanglaText(cols.banana) : "",
+            biscuit: cols.biscuit ? toBanglaText(cols.biscuit) : "",
+            milk: cols.milk ? toBanglaText(cols.milk) : "",
             signature: "",
-            remark: (_f = (_e = dist.remark) === null || _e === void 0 ? void 0 : _e.trim()) !== null && _f !== void 0 ? _f : "",
+            remark: toBanglaMixedText((_f = (_e = dist.remark) === null || _e === void 0 ? void 0 : _e.trim()) !== null && _f !== void 0 ? _f : ""),
         });
     }
     const sumCols = emptyFoodCols();
     for (const row of table) {
         Object.keys(sumCols).forEach((k) => {
-            const n = parseInt(row[k], 10);
+            const englishDigits = banglaToEnglishDigits(String(row[k] || ""));
+            const n = parseInt(englishDigits, 10);
             if (!Number.isNaN(n))
                 sumCols[k] += n;
         });
     }
     return {
         schoolNameBn: school.schoolNameBangla || school.schoolName || "",
-        emisCode: toBengaliNumeralString(school.schoolCode || ""),
-        district: (_h = (_g = school.address) === null || _g === void 0 ? void 0 : _g.district) !== null && _h !== void 0 ? _h : "",
-        upazila: upazilaName,
-        union: (_k = (_j = school.address) === null || _j === void 0 ? void 0 : _j.union) !== null && _k !== void 0 ? _k : "",
+        emisCode: toBanglaText(school.schoolCode || ""),
+        district: toBanglaMixedText((_h = (_g = school.address) === null || _g === void 0 ? void 0 : _g.district) !== null && _h !== void 0 ? _h : ""),
+        upazila: toBanglaMixedText(upazilaName),
+        union: toBanglaMixedText((_k = (_j = school.address) === null || _j === void 0 ? void 0 : _j.union) !== null && _k !== void 0 ? _k : ""),
         cluster: "",
         monthBn: monthNameBn(month),
-        yearBn: toBengaliNumeralString(year),
-        headTeacherPhoneNumber: school.headTeacherPhoneNumber || "",
-        tifinManagerNumber: school.tifinManagerNumber || school.tifinManagerPNumber || "",
+        yearBn: toBanglaText(year),
+        headTeacherPhoneNumber: toBanglaText(school.headTeacherPhoneNumber || ""),
+        tifinManagerNumber: toBanglaText(school.tifinManagerNumber ||
+            school.tifinManagerPNumber ||
+            ""),
         table,
         totals: {
-            banruti: sumCols.banruti ? String(sumCols.banruti) : "",
-            egg: sumCols.egg ? String(sumCols.egg) : "",
-            banana: sumCols.banana ? String(sumCols.banana) : "",
-            biscuit: sumCols.biscuit ? String(sumCols.biscuit) : "",
-            milk: sumCols.milk ? String(sumCols.milk) : "",
+            banruti: sumCols.banruti ? toBanglaText(sumCols.banruti) : "",
+            egg: sumCols.egg ? toBanglaText(sumCols.egg) : "",
+            banana: sumCols.banana ? toBanglaText(sumCols.banana) : "",
+            biscuit: sumCols.biscuit ? toBanglaText(sumCols.biscuit) : "",
+            milk: sumCols.milk ? toBanglaText(sumCols.milk) : "",
         },
     };
 });
@@ -252,25 +282,44 @@ function buildPdfHtml(payload) {
       height: 285mm;
       margin: 0 auto;
       overflow: hidden;
+      position: relative;
+    }
+
+    .form-no {
+      text-align: right;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 42px;
     }
 
     .title {
       text-align: center;
-      font-size: 13px;
+      font-size: 17px;
       font-weight: 700;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
     }
 
     .subtitle {
       text-align: center;
-      font-size: 10.5px;
-      margin-bottom: 2px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
     }
 
     .period {
       text-align: center;
       font-size: 10px;
-      margin-bottom: 5px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .period-line {
+      display: inline-block;
+      min-width: 120px;
+      border-bottom: 1px solid #000;
+      text-align: center;
+      line-height: 1;
+      padding-bottom: 1px;
     }
 
     table {
@@ -280,23 +329,21 @@ function buildPdfHtml(payload) {
     }
 
     .info-table {
-      margin-bottom: 5px;
+      margin-bottom: 0;
     }
 
     .info-table td {
       border: 1px solid #000;
-      padding: 4px 6px;
+      padding: 2px 6px;
       vertical-align: middle;
-      font-size: 8.6px;
-      height: 22px;
-    }
-
-    .label {
+      font-size: 8.4px;
       font-weight: 700;
+      height: 22px;
     }
 
     .main-table {
       border: 1px solid #000;
+      margin-top: 0;
     }
 
     .main-table th,
@@ -307,7 +354,7 @@ function buildPdfHtml(payload) {
       vertical-align: middle;
       word-wrap: break-word;
       overflow-wrap: break-word;
-      font-size: 7.3px;
+      font-size: 7.1px;
       height: 16px;
     }
 
@@ -340,13 +387,13 @@ function buildPdfHtml(payload) {
     .l { text-align: left; }
 
     .h1 th {
-      height: 28px;
-      font-size: 7.5px;
+      height: 34px;
+      font-size: 7.7px;
     }
 
     .h2 th {
-      height: 22px;
-      font-size: 7.1px;
+      height: 24px;
+      font-size: 7.2px;
     }
 
     .h3 th {
@@ -391,28 +438,34 @@ function buildPdfHtml(payload) {
     .w7  { width: 7.8%; }
     .w8  { width: 9.2%; }
     .w9  { width: 7.8%; }
-    .w10 { width: 9%; }
-    .w11 { width: 12.6%; }
+    .w10 { width: 11.5%; }
+    .w11 { width: 15.1%; }
   </style>
 </head>
 <body>
   <div class="page">
+    <div class="form-no">ফরম-০৪</div>
+
     <div class="title">সরকারি প্রাথমিক বিদ্যালয়ে ফিডিং কর্মসূচি</div>
     <div class="subtitle">বিদ্যালয়ে গৃহীত খাদ্যের মাসিক প্রতিবেদন</div>
-    <div class="period">মাস: ${escapeHtml(payload.monthBn)} &nbsp;&nbsp;&nbsp; সাল: ${escapeHtml(payload.yearBn)}</div>
+    <div class="period">
+      মাস:<span class="period-line">${escapeHtml(payload.monthBn)}</span>
+      &nbsp;&nbsp;
+      সাল:<span class="period-line">${escapeHtml(payload.yearBn)}</span>
+    </div>
 
     <table class="info-table">
       <tr>
-        <td><span class="label">বিদ্যালয়ের নাম:</span> ${escapeHtml(payload.schoolNameBn)}</td>
-        <td><span class="label">EMIS কোড:</span> ${escapeHtml(payload.emisCode)}</td>
+        <td>বিদ্যালয়ের নাম: ${escapeHtml(payload.schoolNameBn)}</td>
+        <td>EMIS কোড: ${escapeHtml(payload.emisCode)}</td>
       </tr>
       <tr>
-        <td><span class="label">জেলা:</span> ${escapeHtml(payload.district)}</td>
-        <td><span class="label">উপজেলা:</span> ${escapeHtml(payload.upazila)}</td>
+        <td>জেলা: ${escapeHtml(payload.district)}</td>
+        <td>উপজেলা: ${escapeHtml(payload.upazila)}</td>
       </tr>
       <tr>
-        <td><span class="label">ইউনিয়ন:</span> ${escapeHtml(payload.union)}</td>
-        <td><span class="label">ক্লাস্টার:</span> ${escapeHtml(payload.cluster)}</td>
+        <td>ইউনিয়ন: ${escapeHtml(payload.union)}</td>
+        <td>ক্লাস্টার: ${escapeHtml(payload.cluster)}</td>
       </tr>
     </table>
 
@@ -432,10 +485,10 @@ function buildPdfHtml(payload) {
       </colgroup>
       <thead>
         <tr class="h1">
-          <th class="hlight" rowspan="2">ক্রমিক<br/>নম্বর</th>
-          <th class="hlight" rowspan="2">খাদ্য গ্রহণের তারিখ</th>
-          <th class="hchallan" rowspan="2">চালান নম্বর</th>
-          <th class="hchallan" rowspan="2">চালানের তারিখ</th>
+          <th class="hlight" rowspan="2">ক্রমি<br/>ক<br/>নম্ব<br/>র</th>
+          <th class="hlight" rowspan="2">খাদ্য<br/>গ্রহণের<br/>তারিখ</th>
+          <th class="hchallan" rowspan="2">চালান<br/>নম্বর</th>
+          <th class="hchallan" rowspan="2">চালানের<br/>তারিখ</th>
           <th class="hlight" colspan="5">গৃহীত খাদ্যসামগ্রী (পিস/প্যাকেট)</th>
           <th class="hlight" rowspan="2">গ্রহণকারীর<br/>স্বাক্ষর</th>
           <th class="hlight" rowspan="2">মন্তব্য</th>
@@ -444,8 +497,8 @@ function buildPdfHtml(payload) {
           <th class="hlight">বনরুটি</th>
           <th class="hlight">সিদ্ধ ডিম</th>
           <th class="hlight">কলা</th>
-          <th class="hlight">ফর্টিফাইড বিস্কুট</th>
-          <th class="hlight">ইউএইচটি দুধ</th>
+          <th class="hlight">ফর্টিফাইড<br/>বিস্কুট</th>
+          <th class="hlight">ইউএইচটি<br/>দুধ</th>
         </tr>
         <tr class="h3 hgreen">
           <th>১</th>
@@ -584,19 +637,19 @@ function buildSchoolDistributionMonthDocx(payload) {
         const totalFill = exports.FORM_COLORS.totalRow.replace("#", "");
         const headerRow1 = new docx_1.TableRow({
             children: [
-                docxCell([pCell("ক্রমিক\nনম্বর", { bold: true, size: 9 })], {
+                docxCell([pCell("ক্রমি\nক\nনম্ব\nর", { bold: true, size: 9 })], {
                     shading: light,
                     verticalMerge: docx_1.VerticalMergeType.RESTART,
                 }),
-                docxCell([pCell("খাদ্য গ্রহণের তারিখ", { bold: true, size: 9 })], {
+                docxCell([pCell("খাদ্য\nগ্রহণের\nতারিখ", { bold: true, size: 9 })], {
                     shading: light,
                     verticalMerge: docx_1.VerticalMergeType.RESTART,
                 }),
-                docxCell([pCell("চালান নম্বর", { bold: true, size: 9 })], {
+                docxCell([pCell("চালান\nনম্বর", { bold: true, size: 9 })], {
                     shading: challan,
                     verticalMerge: docx_1.VerticalMergeType.RESTART,
                 }),
-                docxCell([pCell("চালানের তারিখ", { bold: true, size: 9 })], {
+                docxCell([pCell("চালানের\nতারিখ", { bold: true, size: 9 })], {
                     shading: challan,
                     verticalMerge: docx_1.VerticalMergeType.RESTART,
                 }),
@@ -635,8 +688,8 @@ function buildSchoolDistributionMonthDocx(payload) {
                 docxCell([pCell("বনরুটি", { bold: true, size: 8 })], { shading: light }),
                 docxCell([pCell("সিদ্ধ ডিম", { bold: true, size: 8 })], { shading: light }),
                 docxCell([pCell("কলা", { bold: true, size: 8 })], { shading: light }),
-                docxCell([pCell("ফর্টিফাইড বিস্কুট", { bold: true, size: 7 })], { shading: light }),
-                docxCell([pCell("ইউএইচটি দুধ", { bold: true, size: 8 })], { shading: light }),
+                docxCell([pCell("ফর্টিফাইড\nবিস্কুট", { bold: true, size: 7 })], { shading: light }),
+                docxCell([pCell("ইউএইচটি\nদুধ", { bold: true, size: 8 })], { shading: light }),
                 docxCell([new docx_1.Paragraph("")], {
                     shading: light,
                     verticalMerge: docx_1.VerticalMergeType.CONTINUE,
@@ -759,8 +812,20 @@ function buildSchoolDistributionMonthDocx(payload) {
                     },
                     children: [
                         new docx_1.Paragraph({
+                            alignment: docx_1.AlignmentType.RIGHT,
+                            spacing: { after: 260 },
+                            children: [
+                                new docx_1.TextRun({
+                                    text: "ফরম-০৪",
+                                    bold: true,
+                                    size: 24,
+                                    font: REPORT_FONT_FAMILY,
+                                }),
+                            ],
+                        }),
+                        new docx_1.Paragraph({
                             alignment: docx_1.AlignmentType.CENTER,
-                            spacing: { after: 100 },
+                            spacing: { after: 40 },
                             children: [
                                 new docx_1.TextRun({
                                     text: "সরকারি প্রাথমিক বিদ্যালয়ে ফিডিং কর্মসূচি",
@@ -772,10 +837,11 @@ function buildSchoolDistributionMonthDocx(payload) {
                         }),
                         new docx_1.Paragraph({
                             alignment: docx_1.AlignmentType.CENTER,
-                            spacing: { after: 80 },
+                            spacing: { after: 50 },
                             children: [
                                 new docx_1.TextRun({
                                     text: "বিদ্যালয়ে গৃহীত খাদ্যের মাসিক প্রতিবেদন",
+                                    bold: true,
                                     size: 24,
                                     font: REPORT_FONT_FAMILY,
                                 }),
@@ -783,10 +849,11 @@ function buildSchoolDistributionMonthDocx(payload) {
                         }),
                         new docx_1.Paragraph({
                             alignment: docx_1.AlignmentType.CENTER,
-                            spacing: { after: 160 },
+                            spacing: { after: 140 },
                             children: [
                                 new docx_1.TextRun({
                                     text: `মাস: ${payload.monthBn}     সাল: ${payload.yearBn}`,
+                                    bold: true,
                                     size: 22,
                                     font: REPORT_FONT_FAMILY,
                                 }),
@@ -912,7 +979,7 @@ function buildSchoolDistributionMonthDocx(payload) {
     });
 }
 const exportSchoolDistributionMonthlyReport = (payload, format, period) => __awaiter(void 0, void 0, void 0, function* () {
-    const safeCode = payload.emisCode.replace(/[^a-zA-Z0-9-_]/g, "_");
+    const safeCode = banglaToEnglishDigits(payload.emisCode).replace(/[^a-zA-Z0-9-_]/g, "_");
     const ym = `${period.year}-${String(period.month).padStart(2, "0")}`;
     const base = `monthly-food-report-${safeCode}-${ym}`;
     if (format === "pdf") {
