@@ -14,6 +14,6 @@ schoolRouter.get("/:schoolId", schoolController.getSchoolById);
 
 schoolRouter.patch("/:id", schoolController.updateSchool);
 schoolRouter.post("/school-login", schoolController.schoolLogin);
-schoolRouter.get("/branch-manager", auth("upazilaManager"), schoolController.getSchoolForBranchManager);
+schoolRouter.get("/school_by/upazila_manager", auth("upazilaManager"), schoolController.getSchoolForBranchManager);
 
 export default schoolRouter;

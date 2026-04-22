@@ -141,13 +141,14 @@ console.log(schools);
 
 const getSchoolForBranchManager = catchAsync(async (req, res) => {
     const email = req.user?.email as string;
-    const result = await schoolService.getSchoolForBranchManager(email);
-    sendResponse(res, {
-      message: "Schools retrieved successfully",
-      statusCode: StatusCodes.OK,
-      success: true,
-      data: result,
-    });
+   const result = await schoolService.getSchoolForBranchManager(email);
+  sendResponse(res, {
+    message: "School retrieved successfully",
+    statusCode: StatusCodes.OK,
+    success: true,
+    data: result,
+  });
+   
 });
 
 // get school by id

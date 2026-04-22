@@ -7,6 +7,7 @@ export interface IAddress {
 }
 
 export interface ISchool  {
+  _id?: Types.ObjectId;
   schoolName: string;
   schoolNameBangla: string;
   schoolCode: string;
