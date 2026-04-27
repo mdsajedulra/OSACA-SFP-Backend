@@ -14,6 +14,7 @@ schoolRouter.post("/bulk", upload.single("file"), school_controller_1.schoolCont
 schoolRouter.get("/", school_controller_1.schoolController.getAllSchool);
 schoolRouter.get("/:schoolId", school_controller_1.schoolController.getSchoolById);
 schoolRouter.patch("/:id", school_controller_1.schoolController.updateSchool);
+schoolRouter.delete("/:id", school_controller_1.schoolController.deleteSchool);
 schoolRouter.post("/school-login", school_controller_1.schoolController.schoolLogin);
 schoolRouter.get("/school_by/upazila_manager", (0, auth_1.default)("upazilaManager"), school_controller_1.schoolController.getSchoolForBranchManager);
 exports.default = schoolRouter;
