@@ -74,6 +74,12 @@ const getSchoolById = async (id: ObjectId) => {
   return school;
 }
 
+// delete school by id
+
+const deleteSchool = async (id: ObjectId) => {
+  const result = await schoolModel.findByIdAndDelete(id);
+  return result;
+} 
 
 
 
@@ -88,5 +94,6 @@ export const schoolService = {
   updateSchool,
   bulkSchool,
   getSchoolForBranchManager,
-  getSchoolById
+  getSchoolById,
+  deleteSchool
 };

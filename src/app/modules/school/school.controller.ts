@@ -165,7 +165,19 @@ const getSchoolById = catchAsync(async (req, res) => {
   });
 });
 
+// school delete
 
+
+const deleteSchool = catchAsync(async (req, res) => {
+  const id = req.params.id as unknown as ObjectId;
+  const result = await schoolService.deleteSchool(id);
+  sendResponse(res, {
+    message: "School deleted successfully",
+    statusCode: StatusCodes.OK,
+    success: true,
+    data: result,
+  });
+});
 
 
 
@@ -177,5 +189,6 @@ export const schoolController = {
   updateSchool,
   bulkSchool,
   getSchoolForBranchManager,
-  getSchoolById
+  getSchoolById,
+  deleteSchool,
 };

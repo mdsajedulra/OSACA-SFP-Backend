@@ -68,6 +68,11 @@ const getSchoolById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const school = yield school_model_1.default.findById(id);
     return school;
 });
+// delete school by id
+const deleteSchool = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield school_model_1.default.findByIdAndDelete(id);
+    return result;
+});
 exports.schoolService = {
     createSchool,
     schoolLogin,
@@ -75,5 +80,6 @@ exports.schoolService = {
     updateSchool,
     bulkSchool,
     getSchoolForBranchManager,
-    getSchoolById
+    getSchoolById,
+    deleteSchool
 };

@@ -125,6 +125,17 @@ const getSchoolById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
         data: result,
     });
 }));
+// school delete
+const deleteSchool = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const result = yield school_service_1.schoolService.deleteSchool(id);
+    (0, sendResponse_1.default)(res, {
+        message: "School deleted successfully",
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        success: true,
+        data: result,
+    });
+}));
 exports.schoolController = {
     createSchool,
     schoolLogin,
@@ -132,5 +143,6 @@ exports.schoolController = {
     updateSchool,
     bulkSchool,
     getSchoolForBranchManager,
-    getSchoolById
+    getSchoolById,
+    deleteSchool,
 };
