@@ -57,8 +57,8 @@ const FoodDistributionSchema = new mongoose_1.Schema({
     challan: {
         type: String,
         required: false,
-        unique: true,
-        index: true,
+        // unique: true,
+        // index: true,
     },
     schoolId: {
         type: mongoose_1.Schema.Types.ObjectId,

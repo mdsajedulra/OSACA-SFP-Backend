@@ -32,8 +32,8 @@ const FoodDistributionSchema = new Schema<IFoodDistribution>(
         challan: {
             type: String,
             required: false,
-            unique: true,
-            index: true,
+            // unique: true,
+            // index: true,
 
         },
         schoolId: {
