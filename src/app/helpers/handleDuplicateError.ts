@@ -3,11 +3,15 @@ import { StatusCodes } from "http-status-codes";
 import { TErrorSources, TGenericErrorResponse } from "../interface/error";
 
 export const handleDuplicateError = (err: any): TGenericErrorResponse => {
+  const keyValue = err?.keyValue || {};
+
+  const path = Object.keys(keyValue)[0] || "";
+  const value = Object.values(keyValue)[0] || "";
 
   const errorSources: TErrorSources = [
     {
-      path: Object.keys(err.keyValue)[0],
-      message: `${Object.values(err.keyValue)[0]} already exists`,
+      path,
+      message: value ? `${value} already exists` : "Duplicate value already exists",
     },
   ];
 

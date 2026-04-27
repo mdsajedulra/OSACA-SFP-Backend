@@ -87,6 +87,7 @@ const updateSchool = catchAsync(async (req, res, next) => {
 
 
 const bulkSchool = catchAsync(async (req, res) => {
+  
   const filePath = req.file?.path as string;
 
   const workbook = XLSX.readFile(filePath);
@@ -95,7 +96,7 @@ const bulkSchool = catchAsync(async (req, res) => {
 
   const data = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
 
-  console.log(data);
+  // console.log(data);
   
   const schools = data.map((row) => ({
     schoolName: row.schoolName,
@@ -123,10 +124,10 @@ const bulkSchool = catchAsync(async (req, res) => {
   }));
 
 
-console.log(schools);
+// console.log(schools);
 
   const result = await schoolService.bulkSchool(schools as unknown as ISchool[]);
-
+console.log(result);
   fs.unlinkSync(filePath);
 
   sendResponse(res, {
