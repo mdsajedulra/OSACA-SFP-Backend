@@ -47,6 +47,15 @@ const createDistribution = (payload) => __awaiter(void 0, void 0, void 0, functi
     const newDistribution = yield distribution_model_1.FoodDistribution.create(payload);
     return newDistribution;
 });
+// create bulk distribution service function
+const createBulkDistribution = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const createdDistributions = [];
+    for (const distributionData of payload) {
+        const distribution = yield createDistribution(distributionData);
+        createdDistributions.push(distribution);
+    }
+    return createdDistributions;
+});
 // get all distribution
 const getAllDistributions = () => __awaiter(void 0, void 0, void 0, function* () {
     const distributions = yield distribution_model_1.FoodDistribution.find().populate("schoolId").populate("upazilaId");
@@ -118,6 +127,7 @@ const exportSchoolDistributionMonthlyReportService = (payload, format, period) =
 });
 exports.distributionServices = {
     createDistribution,
+    createBulkDistribution,
     getAllDistributions,
     getDistributionById,
     updateDistributionById,

@@ -27,6 +27,16 @@ const createDistribution = (0, catchAsync_1.default)((req, res) => __awaiter(voi
         data: distribution,
     });
 }));
+// create bulk distribution
+const createBulkDistribution = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const distributions = yield distribution_service_1.distributionServices.createBulkDistribution(req.body);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.StatusCodes.CREATED,
+        message: "Food distributions created successfully",
+        data: distributions,
+    });
+}));
 // get all distribution
 const getAllDistributions = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const distributions = yield distribution_service_1.distributionServices.getAllDistributions();
@@ -119,6 +129,7 @@ exports.getSchoolDistributionReport = (0, catchAsync_1.default)((req, res) => __
 }));
 exports.distributionController = {
     createDistribution,
+    createBulkDistribution,
     getDistributionById,
     getAllDistributions,
     updateDistributionById,

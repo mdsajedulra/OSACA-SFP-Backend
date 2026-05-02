@@ -57,7 +57,7 @@ const UserSchema = new mongoose_1.Schema({
     accessUpazila: { type: mongoose_1.Schema.Types.ObjectId, required: false, ref: "Upazila" },
     role: {
         type: String,
-        enum: ["admin", "upazilaManager", "teacher"], // sa= super admin, admin, mo= monitoring Officer, bm = branch Manager
+        enum: ["admin", "upazilaManager", "teacher", "monitoringOfficer"], // sa= super admin, admin, mo= monitoring Officer, bm = branch Manager
     },
     isBlocked: { type: Boolean, default: false },
 }, { timestamps: true });

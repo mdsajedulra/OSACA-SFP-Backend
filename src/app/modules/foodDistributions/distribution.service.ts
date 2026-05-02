@@ -49,7 +49,18 @@ const createDistribution = async (payload: IFoodDistribution) => {
 
   return newDistribution;
 };
+// create bulk distribution service function
 
+const createBulkDistribution = async (payload: IFoodDistribution[]) => {
+  const createdDistributions = [];
+
+  for (const distributionData of payload) {
+    const distribution = await createDistribution(distributionData);
+    createdDistributions.push(distribution);
+  }
+
+  return createdDistributions;
+};
 // get all distribution
 
 const getAllDistributions = async () => {
@@ -164,6 +175,7 @@ const exportSchoolDistributionMonthlyReportService = async (
 
 export const distributionServices = {
   createDistribution,
+  createBulkDistribution,
   getAllDistributions,
   getDistributionById,
   updateDistributionById,

@@ -2,7 +2,7 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
-  role: "admin" | "upazilaManager" | "teacher";
+  role: "admin" | "upazilaManager" | "teacher" |"montoringOfficer";
   accessUpazila?: string; 
   isBlocked?: boolean;
   createdAt: Date;

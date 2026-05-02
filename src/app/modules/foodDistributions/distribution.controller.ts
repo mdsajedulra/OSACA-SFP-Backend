@@ -22,6 +22,19 @@ const createDistribution = catchAsync(async (req, res)=>{
     })
 })
 
+// create bulk distribution
+
+const createBulkDistribution = catchAsync(async (req, res)=>{
+    const distributions = await distributionServices.createBulkDistribution(req.body);
+    sendResponse(res, {
+        success: true, 
+        statusCode: StatusCodes.CREATED,
+        message: "Food distributions created successfully",
+        data: distributions,
+
+    })
+})
+
 // get all distribution
 
 const getAllDistributions = catchAsync(async (req, res)=>{
@@ -151,6 +164,7 @@ export const getSchoolDistributionReport = catchAsync(async (req, res) => {
 
 export const distributionController = {
     createDistribution,
+    createBulkDistribution,
     getDistributionById,
     getAllDistributions,
     updateDistributionById,
