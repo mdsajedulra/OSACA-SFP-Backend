@@ -16,7 +16,7 @@ authrouter.post(
 
 authrouter.post(
   "/change-password",
-  auth("user"),
+  auth("admin", "upazilaManager", "monitoringOfficer",),
   validateRequest(authValidation.changePasswordValidationSchema),
   authController.changePassword
 );
