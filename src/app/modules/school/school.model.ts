@@ -26,6 +26,8 @@ const AddressSchema: Schema<IAddress> = new Schema({
 const SchoolSchema: Schema<ISchool> = new Schema(
   {
     _id: { type: Schema.Types.ObjectId, auto: true },
+
+    pdOfficeSerial: { type: String, required: false },
     schoolName: { type: String, required: true },
     schoolNameBangla: { type: String, required: true },
     schoolCode: { type: String, required: true, unique: true },

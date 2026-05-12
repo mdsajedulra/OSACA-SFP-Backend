@@ -73,6 +73,18 @@ const deleteSchool = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield school_model_1.default.findByIdAndDelete(id);
     return result;
 });
+// bulk school update
+const bulkSchoolUpdate = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const bulkOps = payload.map((school) => ({
+        updateOne: {
+            filter: { schoolCode: school.schoolCode },
+            update: { $set: school },
+            upsert: true,
+        },
+    }));
+    const result = yield school_model_1.default.bulkWrite(bulkOps);
+    return result;
+});
 exports.schoolService = {
     createSchool,
     schoolLogin,
@@ -81,5 +93,6 @@ exports.schoolService = {
     bulkSchool,
     getSchoolForBranchManager,
     getSchoolById,
-    deleteSchool
+    deleteSchool,
+    bulkSchoolUpdate,
 };

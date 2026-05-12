@@ -136,12 +136,49 @@ const deleteSchool = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
         data: result,
     });
 }));
+// bulk school update
+const bulkSchoolUpdate = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const filePath = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
+    const workbook = xlsx_1.default.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx_1.default.utils.sheet_to_json(sheet);
+    const schools = data.map((row) => ({
+        // schoolName: row.schoolName,
+        pdOfficeSerial: row.pdOfficeSerial,
+        // schoolNameBangla: row.schoolNameBangla,
+        schoolCode: row.schoolCode,
+        // password: row.password,
+        // headTeacherPhoneNumber: row.headTeacherPhoneNumber,
+        // headTeacherName: row.headTeacherName,
+        // tifinManager: row.tifinManager || "",
+        // tifinManagerPNumber: row.tifinManagerNumber || "",
+        // totalStudent: Number(row.totalStudent),
+        // defaultItems: Number(row.defaultItem) || 0,
+        // address: {
+        //   upazilaId:  row.upazilaId,
+        //   union: row.union,
+        //   district: row.district,
+        // },
+    }));
+    console.log(schools);
+    const result = yield school_service_1.schoolService.bulkSchoolUpdate(schools);
+    fs_1.default.unlinkSync(filePath);
+    (0, sendResponse_1.default)(res, {
+        message: "Schools updated successfully",
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        success: true,
+        data: result,
+    });
+}));
 exports.schoolController = {
     createSchool,
     schoolLogin,
     getAllSchool,
     updateSchool,
     bulkSchool,
+    bulkSchoolUpdate,
     getSchoolForBranchManager,
     getSchoolById,
     deleteSchool,

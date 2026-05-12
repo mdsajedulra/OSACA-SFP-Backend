@@ -7,7 +7,7 @@ interface IFoodItem {
 
 export interface IAttendance {
   _id?: Types.ObjectId;
-
+challan: string;
   schoolId: Types.ObjectId;
 
   date: Date;

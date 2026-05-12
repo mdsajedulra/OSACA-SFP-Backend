@@ -8,6 +8,7 @@ export interface IAddress {
 
 export interface ISchool  {
   _id?: Types.ObjectId;
+  pdOfficeSerial: string;
   schoolName: string;
   schoolNameBangla: string;
   schoolCode: string;

@@ -41,6 +41,10 @@ const AttendanceSchema = new mongoose_1.Schema({
         ref: "School",
         required: true,
     },
+    challan: {
+        type: String,
+        required: false,
+    },
     date: {
         type: Date,
         required: true,

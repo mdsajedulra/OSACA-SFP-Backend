@@ -13,6 +13,7 @@ import { ISchool } from "./school.interface";
 
 type ExcelRow = {
   schoolName: string;
+  pdOfficeSerial: string;
   schoolNameBangla: string;
   schoolCode: string;
   password: string;
@@ -179,7 +180,46 @@ const deleteSchool = catchAsync(async (req, res) => {
   });
 });
 
+// bulk school update
 
+const bulkSchoolUpdate = catchAsync(async (req, res) => {
+  const filePath = req.file?.path as string;
+
+  const workbook = XLSX.readFile(filePath);
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+
+  const data = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
+
+  const schools = data.map((row) => ({
+    // schoolName: row.schoolName,
+    pdOfficeSerial: row.pdOfficeSerial,
+    // schoolNameBangla: row.schoolNameBangla,
+    schoolCode: row.schoolCode,
+    // password: row.password,
+    // headTeacherPhoneNumber: row.headTeacherPhoneNumber,
+    // headTeacherName: row.headTeacherName,
+    // tifinManager: row.tifinManager || "",
+    // tifinManagerPNumber: row.tifinManagerNumber || "",
+    // totalStudent: Number(row.totalStudent),
+    // defaultItems: Number(row.defaultItem) || 0,
+    // address: {
+    //   upazilaId:  row.upazilaId,
+    //   union: row.union,
+    //   district: row.district,
+    // },
+  }));
+console.log(schools);
+  const result = await schoolService.bulkSchoolUpdate(schools as unknown as ISchool[]);
+  fs.unlinkSync(filePath);
+
+  sendResponse(res, {
+    message: "Schools updated successfully",
+    statusCode: StatusCodes.OK,
+    success: true,
+    data: result,
+  });
+});
 
 
 export const schoolController = {
@@ -188,6 +228,7 @@ export const schoolController = {
   getAllSchool,
   updateSchool,
   bulkSchool,
+  bulkSchoolUpdate,
   getSchoolForBranchManager,
   getSchoolById,
   deleteSchool,

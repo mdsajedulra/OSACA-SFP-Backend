@@ -45,6 +45,7 @@ const AddressSchema = new mongoose_1.Schema({
 });
 const SchoolSchema = new mongoose_1.Schema({
     _id: { type: mongoose_1.Schema.Types.ObjectId, auto: true },
+    pdOfficeSerial: { type: String, required: false },
     schoolName: { type: String, required: true },
     schoolNameBangla: { type: String, required: true },
     schoolCode: { type: String, required: true, unique: true },

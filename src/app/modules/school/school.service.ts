@@ -81,6 +81,21 @@ const deleteSchool = async (id: ObjectId) => {
   return result;
 } 
 
+// bulk school update
+
+const bulkSchoolUpdate = async (payload: ISchool[]) => {
+  
+  const bulkOps = payload.map((school) => ({
+    updateOne: {
+      filter: { schoolCode: school.schoolCode },
+      update: { $set: school },
+      upsert: true,
+    },
+  }));
+
+  const result = await schoolModel.bulkWrite(bulkOps);
+  return result;
+};
 
 
 
@@ -95,5 +110,6 @@ export const schoolService = {
   bulkSchool,
   getSchoolForBranchManager,
   getSchoolById,
-  deleteSchool
+  deleteSchool,
+  bulkSchoolUpdate,
 };

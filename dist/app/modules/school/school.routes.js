@@ -11,6 +11,7 @@ const schoolRouter = (0, express_1.Router)();
 const upload = (0, multer_1.default)({ dest: "uploads/" });
 schoolRouter.post("/", school_controller_1.schoolController.createSchool);
 schoolRouter.post("/bulk", upload.single("file"), school_controller_1.schoolController.bulkSchool);
+schoolRouter.patch("/bulk", upload.single("file"), school_controller_1.schoolController.bulkSchoolUpdate);
 schoolRouter.get("/", school_controller_1.schoolController.getAllSchool);
 schoolRouter.get("/:schoolId", school_controller_1.schoolController.getSchoolById);
 schoolRouter.patch("/:id", school_controller_1.schoolController.updateSchool);
