@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateAllChallansPdf = generateAllChallansPdf;
-const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
+const puppeteer_1 = __importDefault(require("puppeteer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const pdf_lib_1 = require("pdf-lib");
@@ -206,17 +206,17 @@ function generateAllChallansPdf(batchId) {
         if (!fs_1.default.existsSync(outputDir))
             fs_1.default.mkdirSync(outputDir, { recursive: true });
         const tmpDir = path_1.default.join(process.cwd(), `chrome-tmp-${Date.now()}`);
-        const browser = yield puppeteer_core_1.default.launch({
+        const browser = yield puppeteer_1.default.launch({
             headless: true,
-            executablePath: CHROME_PATH,
+            // executablePath: CHROME_PATH,
             args: [
                 "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-extensions",
-                "--no-first-run",
+                // "--disable-setuid-sandbox",
+                // "--disable-dev-shm-usage",
+                // "--disable-extensions",
+                // "--no-first-run",
             ],
-            userDataDir: tmpDir,
+            // userDataDir: tmpDir,
         });
         try {
             for (const [upazilaName, dateMap] of upazilaMap) {

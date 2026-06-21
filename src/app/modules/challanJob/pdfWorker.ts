@@ -14,6 +14,7 @@ export function startPdfWorker() {
       { status: "processing" },
       { new: true },
     );
+    
     console.log("🔄 PDF Worker: pending job found", job);
     if (!job) return; // নেই — চুপ থাকো
 

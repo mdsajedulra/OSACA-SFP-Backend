@@ -136,7 +136,7 @@ const createAllEntry = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
     if (!user) {
         throw new Error("User not found");
     }
-    console.log(user);
+    // console.log(user);
     const selectedDate = req.body.selectedDates;
     if (!selectedDate) {
         throw new Error("selectedDates is required in the request body");

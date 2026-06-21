@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer-core";
+import puppeteer from "puppeteer";
 import path from "path";
 import fs from "fs";
 import { PDFDocument } from "pdf-lib";
@@ -218,15 +218,15 @@ export async function generateAllChallansPdf(batchId: string): Promise<string> {
   const tmpDir = path.join(process.cwd(), `chrome-tmp-${Date.now()}`);
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: CHROME_PATH,
+    // executablePath: CHROME_PATH,
     args: [
       "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-extensions",
-      "--no-first-run",
+      // "--disable-setuid-sandbox",
+      // "--disable-dev-shm-usage",
+      // "--disable-extensions",
+      // "--no-first-run",
     ],
-    userDataDir: tmpDir,
+    // userDataDir: tmpDir,
   });
 
   try {

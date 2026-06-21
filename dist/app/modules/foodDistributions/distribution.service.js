@@ -126,7 +126,7 @@ const getDistributionForBranchManager = (email) => __awaiter(void 0, void 0, voi
     const distribution = yield distribution_model_1.FoodDistribution.find({ upazilaId })
         .populate("schoolId")
         .populate("upazilaId"); // populate school name and address
-    console.log("Distribution found:", distribution.length);
+    // console.log("Distribution found:", distribution.length);
     return distribution;
 });
 const getSchoolDistributionMonthlyReportService = (schoolId, month, year) => __awaiter(void 0, void 0, void 0, function* () {
@@ -157,7 +157,7 @@ function getItemsForDate(date,
 // studentCount: number,
 currentNo, defaultItems) {
     const day = date.getDay(); // 0=রবি, 1=সোম ... 6=শনি
-    console.log(day);
+    // console.log(day);
     const foods = MENU[day]; // সেদিনের খাবারের key list
     // শুক্রবার → foods = [] → map করলে [] আসবে
     return foods.map((key) => ({

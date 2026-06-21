@@ -16,6 +16,8 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const app_1 = __importDefault(require("./app"));
 const config_1 = __importDefault(require("./app/config"));
 const pdfWorker_1 = require("./app/modules/challanJob/pdfWorker");
+const dns_1 = __importDefault(require("dns"));
+dns_1.default.setServers(["8.8.8.8", "8.8.4.4"]);
 function server() {
     return __awaiter(this, void 0, void 0, function* () {
         try {

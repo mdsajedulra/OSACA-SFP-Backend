@@ -18,5 +18,5 @@ distributionRouter.delete("/:id", distribution_controller_1.distributionControll
 distributionRouter.get("/branch-manager", (0, auth_1.default)("upazilaManager"), distribution_controller_1.distributionController.getDistributionForBranchManager);
 // distribution bulk insert and generate pdf work from here 
 distributionRouter.post('/createallentry', (0, auth_1.default)("admin"), distribution_controller_1.distributionController.createAllEntry);
-distributionRouter.post('/generate-pdf', distribution_controller_1.distributionController.generatePdf);
+distributionRouter.post('/generate-pdf', (0, auth_1.default)("admin"), distribution_controller_1.distributionController.generatePdf);
 exports.default = distributionRouter;

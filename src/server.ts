@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 import app from "./app";
 import config from "./app/config";
 import { startPdfWorker } from "./app/modules/challanJob/pdfWorker";
-
+import dns from "dns";
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 async function server() {
   try {
     await mongoose.connect(config.database_url as string);
