@@ -33,32 +33,15 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Upazila = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const UpazilaSchema = new mongoose_1.Schema({
-    upazilaCode: {
+const challanJobSchema = new mongoose_1.Schema({
+    batchId: { type: mongoose_1.Schema.Types.ObjectId, required: true },
+    status: {
         type: String,
-        required: true,
-        unique: true,
+        enum: ["pending", "processing", "ready", "failed"],
+        default: "pending",
     },
-    upazilaName: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    upazilaConcernedOfficer: {
-        type: String,
-        required: true,
-    },
-    upazilaConcernedOfficerMobile: {
-        type: String,
-        required: true,
-    },
-    upazilaConcernOfficerDesignation: {
-        type: String,
-        required: true,
-    },
-}, {
-    timestamps: true,
-});
-exports.Upazila = mongoose_1.default.model("Upazila", UpazilaSchema);
+    pdfPath: { type: String, required: false },
+    error: { type: String, required: false },
+}, { timestamps: true });
+exports.default = mongoose_1.default.model("pdfJob", challanJobSchema);

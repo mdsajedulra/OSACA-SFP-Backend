@@ -6,6 +6,7 @@ import attendanceRoutes from "../modules/Attendance/attendance.routes";
 import contactInfoRouter from "../modules/contactinfo/contactInfo.routes";
 import upazilaRouter from "../modules/upazila/upazila.routes";
 import distributionRouter from "../modules/foodDistributions/distribution.routes";
+import challanRouter from "../modules/challan/challan.route";
 
 const router = Router();
 
@@ -35,8 +36,8 @@ const moduleRoutes = [
     route: contactInfoRouter,
   },
   {
-    path: "/attendance",
-    route: attendanceRoutes,
+    path: "/challan",
+    route: challanRouter,
   },
 ];
 

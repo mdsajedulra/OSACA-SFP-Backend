@@ -6,6 +6,7 @@ export interface IFoodItem {
   food: string;
   sent: number;
   received: number;
+  challanNo?: number;
 }
 
 export type DistributionStatus =
@@ -17,10 +18,10 @@ export type DistributionStatus =
 export interface IFoodDistribution {
   _id?: ObjectId;
 
-  challan?: string; // unique
+  // challan?: string; // unique
 
   schoolId: ObjectId;
-  
+
   upazilaId: ObjectId;
 
   date: Date;
@@ -36,6 +37,7 @@ export interface IFoodDistribution {
   confirmedAt?: Date;
 
   remark?: string;
+  batchId?: ObjectId;
 
   createdAt?: Date;
   updatedAt?: Date;

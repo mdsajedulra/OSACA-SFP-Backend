@@ -18,6 +18,7 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const distribution_service_1 = require("./distribution.service");
 const mongoose_1 = require("mongoose");
+const user_model_1 = require("../user/user.model");
 const createDistribution = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const distribution = yield distribution_service_1.distributionServices.createDistribution(req.body);
     (0, sendResponse_1.default)(res, {
@@ -47,7 +48,7 @@ const getAllDistributions = (0, catchAsync_1.default)((req, res) => __awaiter(vo
         data: distributions,
     });
 }));
-// get distribution by id 
+// get distribution by id
 const getDistributionById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const distribution = yield distribution_service_1.distributionServices.getDistributionById(req.params.id);
     (0, sendResponse_1.default)(res, {
@@ -76,7 +77,7 @@ const deleteDistributionById = (0, catchAsync_1.default)((req, res) => __awaiter
         message: "Distribution deleted successfully",
     });
 }));
-// get distribution by school id 
+// get distribution by school id
 const getDistributionBySchoolIdLast = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const distribution = yield distribution_service_1.distributionServices.getDistributionBySchoolIdLast(req.params.id);
     (0, sendResponse_1.default)(res, {
@@ -86,7 +87,7 @@ const getDistributionBySchoolIdLast = (0, catchAsync_1.default)((req, res) => __
         data: distribution,
     });
 }));
-// get 
+// get
 // get distribution for branch manager
 const getDistributionForBranchManager = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = req.user;
@@ -99,7 +100,7 @@ const getDistributionForBranchManager = (0, catchAsync_1.default)((req, res) => 
         data: distributions,
     });
 }));
-// 
+//
 exports.getSchoolDistributionReport = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const schoolId = String(req.params.schoolId);
@@ -127,6 +128,37 @@ exports.getSchoolDistributionReport = (0, catchAsync_1.default)((req, res) => __
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     return res.end(body);
 }));
+// bulk entry and pdf generation
+const createAllEntry = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    // console.log(req.user)
+    const user = yield user_model_1.User.findOne({ email: (_a = req.user) === null || _a === void 0 ? void 0 : _a.email }).lean();
+    if (!user) {
+        throw new Error("User not found");
+    }
+    console.log(user);
+    const selectedDate = req.body.selectedDates;
+    if (!selectedDate) {
+        throw new Error("selectedDates is required in the request body");
+    }
+    const result = yield distribution_service_1.distributionServices.createAllEntry(selectedDate, String(user._id));
+    (0, sendResponse_1.default)(res, {
+        message: "all data create",
+        statusCode: http_status_codes_1.StatusCodes.CREATED,
+        success: true,
+        data: result,
+    });
+}));
+const generatePdf = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { batchId } = req.body;
+    const result = yield distribution_service_1.distributionServices.startPdfWorker(batchId);
+    (0, sendResponse_1.default)(res, {
+        message: "PDF generated successfully",
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        success: true,
+        data: result,
+    });
+}));
 exports.distributionController = {
     createDistribution,
     createBulkDistribution,
@@ -137,5 +169,7 @@ exports.distributionController = {
     // get distribution for branch manager
     getDistributionForBranchManager,
     getDistributionBySchoolIdLast,
-    getSchoolDistributionReport: exports.getSchoolDistributionReport
+    getSchoolDistributionReport: exports.getSchoolDistributionReport,
+    createAllEntry,
+    generatePdf,
 };

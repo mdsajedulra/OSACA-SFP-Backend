@@ -3,7 +3,7 @@ import { IUpazila } from "./upazila.interface";
 
 const UpazilaSchema: Schema = new Schema(
   {
-    upazilaCode : {
+    upazilaCode: {
       type: String,
       required: true,
       unique: true,
@@ -13,6 +13,19 @@ const UpazilaSchema: Schema = new Schema(
       type: String,
       required: true,
       trim: true,
+    },
+
+    upazilaConcernedOfficer: {
+      type: String,
+      required: true,
+    },
+    upazilaConcernedOfficerMobile: {
+      type: String,
+      required: true,
+    },
+    upazilaConcernOfficerDesignation: {
+      type: String,
+      required: true,
     },
   },
   {

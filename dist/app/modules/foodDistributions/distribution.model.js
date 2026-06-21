@@ -39,7 +39,7 @@ const FoodItemSchema = new mongoose_1.Schema({
     food: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     sent: {
         type: Number,
@@ -51,15 +51,21 @@ const FoodItemSchema = new mongoose_1.Schema({
         required: true,
         min: 0,
     },
-}, { _id: false });
-// Main schema for food distribution 
-const FoodDistributionSchema = new mongoose_1.Schema({
-    challan: {
-        type: String,
-        required: false,
-        // unique: true,
-        // index: true,
+    challanNo: {
+        type: Number,
+        required: true,
+        unique: true,
+        index: true,
     },
+}, { _id: false });
+// Main schema for food distribution
+const FoodDistributionSchema = new mongoose_1.Schema({
+    // challan: {
+    //     type: String,
+    //     required: false,
+    //     // unique: true,
+    //     // index: true,
+    // },
     schoolId: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "School",
@@ -69,6 +75,11 @@ const FoodDistributionSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Upazila",
         required: true,
+    },
+    batchId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "GenerationBatch",
+        required: false,
     },
     date: {
         type: Date,

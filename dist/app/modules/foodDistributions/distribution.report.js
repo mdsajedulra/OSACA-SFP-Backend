@@ -15,10 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.exportSchoolDistributionMonthlyReport = exports.getSchoolDistributionMonthlyReport = exports.FORM_COLORS = void 0;
 exports.toBengaliNumeralString = toBengaliNumeralString;
 exports.monthNameBn = monthNameBn;
-exports.buildSchoolDistributionMonthPdf = buildSchoolDistributionMonthPdf;
 exports.buildSchoolDistributionMonthDocx = buildSchoolDistributionMonthDocx;
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
-const puppeteer_1 = __importDefault(require("puppeteer"));
+// import puppeteer from "puppeteer";
 const mongoose_1 = require("mongoose");
 const docx_1 = require("docx");
 const distribution_model_1 = require("./distribution.model");
@@ -559,42 +558,41 @@ function buildPdfHtml(payload) {
 </html>
   `;
 }
-function buildSchoolDistributionMonthPdf(payload) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const browser = yield puppeteer_1.default.launch({
-            headless: true,
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-            args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        });
-        try {
-            const page = yield browser.newPage();
-            yield page.setViewport({
-                width: 1240,
-                height: 1754,
-                deviceScaleFactor: 1,
-            });
-            yield page.setContent(buildPdfHtml(payload), {
-                waitUntil: "networkidle0",
-            });
-            yield page.evaluateHandle("document.fonts.ready");
-            const pdf = yield page.pdf({
-                format: "A4",
-                printBackground: true,
-                preferCSSPageSize: true,
-                margin: {
-                    top: "0mm",
-                    right: "0mm",
-                    bottom: "0mm",
-                    left: "0mm",
-                },
-            });
-            return Buffer.from(pdf);
-        }
-        finally {
-            yield browser.close();
-        }
-    });
-}
+// export async function buildSchoolDistributionMonthPdf(
+//   payload: OfficialMonthlyReportPayload
+// ): Promise<Buffer> {
+//   const browser = await puppeteer.launch({
+//     headless: true,
+//     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+//     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+//   });
+//   try {
+//     const page = await browser.newPage();
+//     await page.setViewport({
+//       width: 1240,
+//       height: 1754,
+//       deviceScaleFactor: 1,
+//     });
+//     await page.setContent(buildPdfHtml(payload), {
+//       waitUntil: "networkidle0",
+//     });
+//     await page.evaluateHandle("document.fonts.ready");
+//     const pdf = await page.pdf({
+//       format: "A4",
+//       printBackground: true,
+//       preferCSSPageSize: true,
+//       margin: {
+//         top: "0mm",
+//         right: "0mm",
+//         bottom: "0mm",
+//         left: "0mm",
+//       },
+//     });
+//     return Buffer.from(pdf);
+//   } finally {
+//     await browser.close();
+//   }
+// }
 const REPORT_FONT_FAMILY = "Nirmala UI";
 const cellBorder = {
     top: { style: docx_1.BorderStyle.SINGLE, size: 1, color: "000000" },
@@ -982,14 +980,14 @@ const exportSchoolDistributionMonthlyReport = (payload, format, period) => __awa
     const safeCode = banglaToEnglishDigits(payload.emisCode).replace(/[^a-zA-Z0-9-_]/g, "_");
     const ym = `${period.year}-${String(period.month).padStart(2, "0")}`;
     const base = `monthly-food-report-${safeCode}-${ym}`;
-    if (format === "pdf") {
-        const buffer = yield buildSchoolDistributionMonthPdf(payload);
-        return {
-            buffer,
-            contentType: "application/pdf",
-            filename: `${base}.pdf`,
-        };
-    }
+    // if (format === "pdf") {
+    //   const buffer = await buildSchoolDistributionMonthPdf(payload);
+    //   return {
+    //     buffer,
+    //     contentType: "application/pdf",
+    //     filename: `${base}.pdf`,
+    //   };
+    // }
     const buffer = yield buildSchoolDistributionMonthDocx(payload);
     return {
         buffer,

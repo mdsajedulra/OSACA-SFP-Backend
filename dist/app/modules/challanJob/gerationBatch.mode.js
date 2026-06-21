@@ -1,4 +1,5 @@
 "use strict";
+// models/generationBatch.model.ts
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -33,32 +34,29 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Upazila = void 0;
+exports.generationBatchModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const UpazilaSchema = new mongoose_1.Schema({
-    upazilaCode: {
-        type: String,
-        required: true,
-        unique: true,
+const generationBatchSchema = new mongoose_1.Schema({
+    name: { type: String, required: true },
+    selectedDates: [{ type: Date }],
+    totalSchools: { type: Number, default: 0 },
+    totalDistributions: { type: Number, default: 0 },
+    totalChallans: { type: Number, default: 0 },
+    challanRange: {
+        from: { type: String }, // "000001"
+        to: { type: String }, // "004992"
     },
-    upazilaName: {
+    status: {
         type: String,
-        required: true,
-        trim: true,
+        enum: ["processing", "done", "zip_generating", "zip_ready", "failed"],
+        default: "processing",
     },
-    upazilaConcernedOfficer: {
-        type: String,
-        required: true,
-    },
-    upazilaConcernedOfficerMobile: {
-        type: String,
-        required: true,
-    },
-    upazilaConcernOfficerDesignation: {
-        type: String,
+    zipPath: { type: String }, // PDF ready হলে path এখানে
+    zipGeneratedAt: { type: Date },
+    generatedBy: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
     },
-}, {
-    timestamps: true,
-});
-exports.Upazila = mongoose_1.default.model("Upazila", UpazilaSchema);
+}, { timestamps: true });
+exports.generationBatchModel = mongoose_1.default.model("GenerationBatch", generationBatchSchema);

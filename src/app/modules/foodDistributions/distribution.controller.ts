@@ -4,118 +4,124 @@ import sendResponse from "../../utils/sendResponse";
 import { distributionServices } from "./distribution.service";
 import { ObjectId } from "mongodb";
 import { get, Types } from "mongoose";
-import { cleanRegex } from "zod/v4/core/util.cjs";
-import { generateHTML } from "../../utils/htmlTemplate";
-import { generatePDF } from "../../utils/pdfGenerator";
+
+// import { generatePDF } from "../../utils/pdfGenerator";
 import schoolModel from "../school/school.model";
 import { generateDocx } from "../../utils/docxGenerator";
 import { populate } from "dotenv";
+import { startPdfWorker } from "../challanJob/pdfWorker";
+import { User } from "../user/user.model";
 
-const createDistribution = catchAsync(async (req, res)=>{
-    const distribution = await distributionServices.createDistribution(req.body);
-    sendResponse(res, {
-        success: true, 
-        statusCode: StatusCodes.CREATED,
-        message: "Food distribution created successfully",
-        data: distribution,
-
-    })
-})
+const createDistribution = catchAsync(async (req, res) => {
+  const distribution = await distributionServices.createDistribution(req.body);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.CREATED,
+    message: "Food distribution created successfully",
+    data: distribution,
+  });
+});
 
 // create bulk distribution
 
-const createBulkDistribution = catchAsync(async (req, res)=>{
-    const distributions = await distributionServices.createBulkDistribution(req.body);
-    sendResponse(res, {
-        success: true, 
-        statusCode: StatusCodes.CREATED,
-        message: "Food distributions created successfully",
-        data: distributions,
-
-    })
-})
+const createBulkDistribution = catchAsync(async (req, res) => {
+  const distributions = await distributionServices.createBulkDistribution(
+    req.body,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.CREATED,
+    message: "Food distributions created successfully",
+    data: distributions,
+  });
+});
 
 // get all distribution
 
-const getAllDistributions = catchAsync(async (req, res)=>{
-    const distributions = await distributionServices.getAllDistributions();
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: "Food distributions retrieved successfully",
-        data: distributions,
-    });
+const getAllDistributions = catchAsync(async (req, res) => {
+  const distributions = await distributionServices.getAllDistributions();
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Food distributions retrieved successfully",
+    data: distributions,
+  });
 });
 
+// get distribution by id
 
-
-// get distribution by id 
-
-const getDistributionById = catchAsync(async (req, res)=>{
-    const distribution = await distributionServices.getDistributionById(req.params.id as unknown as ObjectId);
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: "Distribution found successfully",
-        data: distribution,
-    });
+const getDistributionById = catchAsync(async (req, res) => {
+  const distribution = await distributionServices.getDistributionById(
+    req.params.id as unknown as ObjectId,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Distribution found successfully",
+    data: distribution,
+  });
 });
 
 // update distribution by id
 
-const updateDistributionById = catchAsync(async (req, res)=>{
-    const distribution = await distributionServices.updateDistributionById(req.params.id as unknown as ObjectId, req.body);
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: "Distribution updated successfully",
-        data: distribution,
-    });
-})
+const updateDistributionById = catchAsync(async (req, res) => {
+  const distribution = await distributionServices.updateDistributionById(
+    req.params.id as unknown as ObjectId,
+    req.body,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Distribution updated successfully",
+    data: distribution,
+  });
+});
 
 // delete distribution by id
 
-const deleteDistributionById = catchAsync(async (req, res)=>{
-    await distributionServices.deleteDistributionById(req.params.id as unknown as ObjectId);
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: "Distribution deleted successfully",
-    });
-})
-// get distribution by school id 
+const deleteDistributionById = catchAsync(async (req, res) => {
+  await distributionServices.deleteDistributionById(
+    req.params.id as unknown as ObjectId,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Distribution deleted successfully",
+  });
+});
+// get distribution by school id
 
-const getDistributionBySchoolIdLast = catchAsync(async (req, res)=>{
-    const distribution = await distributionServices.getDistributionBySchoolIdLast(req.params.id as string);
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: "Distribution found successfully",
-        data: distribution,
-    });
-})
+const getDistributionBySchoolIdLast = catchAsync(async (req, res) => {
+  const distribution = await distributionServices.getDistributionBySchoolIdLast(
+    req.params.id as string,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Distribution found successfully",
+    data: distribution,
+  });
+});
 
-// get 
-
+// get
 
 // get distribution for branch manager
 
-const getDistributionForBranchManager = catchAsync(async (req, res)=>{
+const getDistributionForBranchManager = catchAsync(async (req, res) => {
+  const user = req.user;
+  console.log(user);
 
-    const user = req.user;
-    console.log(user)
-    
-    const distributions = await distributionServices.getDistributionForBranchManager(user?.email);
-    sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: "Distributions retrieved successfully",
-        data: distributions,
-    });
+  const distributions =
+    await distributionServices.getDistributionForBranchManager(user?.email);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Distributions retrieved successfully",
+    data: distributions,
+  });
+});
 
-})
-
-// 
+//
 
 export const getSchoolDistributionReport = catchAsync(async (req, res) => {
   const schoolId = String(req.params.schoolId);
@@ -142,14 +148,14 @@ export const getSchoolDistributionReport = catchAsync(async (req, res) => {
   const payload = await distributionServices.getSchoolDistributionMonthlyReport(
     schoolId,
     month,
-    year
+    year,
   );
 
   const { buffer, contentType, filename } =
     await distributionServices.exportSchoolDistributionMonthlyReport(
       payload,
       type,
-      { year, month }
+      { year, month },
     );
 
   const body = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
@@ -162,17 +168,53 @@ export const getSchoolDistributionReport = catchAsync(async (req, res) => {
   return res.end(body);
 });
 
+// bulk entry and pdf generation
+const createAllEntry = catchAsync(async (req, res) => {
+  // console.log(req.user)
+  const user = await User.findOne({ email: req.user?.email }).lean();
+  if (!user) {
+    throw new Error("User not found");
+  }
+  console.log(user);
+  const selectedDate = req.body.selectedDates;
+  if (!selectedDate) {
+    throw new Error("selectedDates is required in the request body");
+  }
+  const result = await distributionServices.createAllEntry(
+    selectedDate,
+    String(user._id),
+  );
+  sendResponse(res, {
+    message: "all data create",
+    statusCode: StatusCodes.CREATED,
+    success: true,
+    data: result,
+  });
+});
+
+const generatePdf = catchAsync(async (req, res) => {
+  const { batchId } = req.body;
+  const result = await distributionServices.startPdfWorker(batchId);
+
+  sendResponse(res, {
+    message: "PDF generated successfully",
+    statusCode: StatusCodes.OK,
+    success: true,
+    data: result,
+  });
+});
+
 export const distributionController = {
-    createDistribution,
-    createBulkDistribution,
-    getDistributionById,
-    getAllDistributions,
-    updateDistributionById,
-    deleteDistributionById,
-    // get distribution for branch manager
-    getDistributionForBranchManager,
-    getDistributionBySchoolIdLast,
-    getSchoolDistributionReport
-    
-    
-}
+  createDistribution,
+  createBulkDistribution,
+  getDistributionById,
+  getAllDistributions,
+  updateDistributionById,
+  deleteDistributionById,
+  // get distribution for branch manager
+  getDistributionForBranchManager,
+  getDistributionBySchoolIdLast,
+  getSchoolDistributionReport,
+  createAllEntry,
+  generatePdf,
+};

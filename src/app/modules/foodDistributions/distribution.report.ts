@@ -1,5 +1,5 @@
 import moment from "moment-timezone";
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
 import { Types } from "mongoose";
 import {
   AlignmentType,
@@ -643,47 +643,47 @@ function buildPdfHtml(payload: OfficialMonthlyReportPayload): string {
   `;
 }
 
-export async function buildSchoolDistributionMonthPdf(
-  payload: OfficialMonthlyReportPayload
-): Promise<Buffer> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+// export async function buildSchoolDistributionMonthPdf(
+//   payload: OfficialMonthlyReportPayload
+// ): Promise<Buffer> {
+//   const browser = await puppeteer.launch({
+//     headless: true,
+//     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+//     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+//   });
 
-  try {
-    const page = await browser.newPage();
+//   try {
+//     const page = await browser.newPage();
 
-    await page.setViewport({
-      width: 1240,
-      height: 1754,
-      deviceScaleFactor: 1,
-    });
+//     await page.setViewport({
+//       width: 1240,
+//       height: 1754,
+//       deviceScaleFactor: 1,
+//     });
 
-    await page.setContent(buildPdfHtml(payload), {
-      waitUntil: "networkidle0",
-    });
+//     await page.setContent(buildPdfHtml(payload), {
+//       waitUntil: "networkidle0",
+//     });
 
-    await page.evaluateHandle("document.fonts.ready");
+//     await page.evaluateHandle("document.fonts.ready");
 
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      preferCSSPageSize: true,
-      margin: {
-        top: "0mm",
-        right: "0mm",
-        bottom: "0mm",
-        left: "0mm",
-      },
-    });
+//     const pdf = await page.pdf({
+//       format: "A4",
+//       printBackground: true,
+//       preferCSSPageSize: true,
+//       margin: {
+//         top: "0mm",
+//         right: "0mm",
+//         bottom: "0mm",
+//         left: "0mm",
+//       },
+//     });
 
-    return Buffer.from(pdf);
-  } finally {
-    await browser.close();
-  }
-}
+//     return Buffer.from(pdf);
+//   } finally {
+//     await browser.close();
+//   }
+// }
 
 const REPORT_FONT_FAMILY = "Nirmala UI";
 
@@ -1132,14 +1132,14 @@ export const exportSchoolDistributionMonthlyReport = async (
   const ym = `${period.year}-${String(period.month).padStart(2, "0")}`;
   const base = `monthly-food-report-${safeCode}-${ym}`;
 
-  if (format === "pdf") {
-    const buffer = await buildSchoolDistributionMonthPdf(payload);
-    return {
-      buffer,
-      contentType: "application/pdf",
-      filename: `${base}.pdf`,
-    };
-  }
+  // if (format === "pdf") {
+  //   const buffer = await buildSchoolDistributionMonthPdf(payload);
+  //   return {
+  //     buffer,
+  //     contentType: "application/pdf",
+  //     filename: `${base}.pdf`,
+  //   };
+  // }
 
   const buffer = await buildSchoolDistributionMonthDocx(payload);
   return {
