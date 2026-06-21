@@ -20,7 +20,7 @@ distributionRouter.get("/branch-manager", auth("upazilaManager"), distributionCo
 // distribution bulk insert and generate pdf work from here 
 
 distributionRouter.post('/createallentry', auth("admin"), distributionController.createAllEntry)
-distributionRouter.post('/generate-pdf', distributionController.generatePdf)
+distributionRouter.post('/generate-pdf', auth("admin"), distributionController.generatePdf)
 
 
 export default distributionRouter;

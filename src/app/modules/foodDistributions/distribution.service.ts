@@ -165,7 +165,7 @@ const getDistributionForBranchManager = async (email: string) => {
     .populate("schoolId")
     .populate("upazilaId"); // populate school name and address
 
-  console.log("Distribution found:", distribution.length);
+  // console.log("Distribution found:", distribution.length);
 
   return distribution;
 };
@@ -214,7 +214,7 @@ function getItemsForDate(
   defaultItems?: number,
 ) {
   const day = date.getDay(); // 0=রবি, 1=সোম ... 6=শনি
-  console.log(day);
+  // console.log(day);
   const foods = MENU[day]; // সেদিনের খাবারের key list
 
   // শুক্রবার → foods = [] → map করলে [] আসবে
