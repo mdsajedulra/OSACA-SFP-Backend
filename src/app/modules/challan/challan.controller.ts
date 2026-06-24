@@ -21,7 +21,7 @@ const getSingleChallan = catchAsync(async (req, res) => {
       populate: { path: "address.upazilaId", model: "Upazila" },
     })
     .lean();
-
+console.log(challan)
   if (!challan) {
     return res.status(404).json({ message: "Challan not found" });
   }

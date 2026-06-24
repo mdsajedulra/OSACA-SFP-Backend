@@ -13,7 +13,7 @@ export function buildSingleHTML(c: any, logoBase64: string): string {
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="/src/assets/NotoSerifBengali.ttf" rel="stylesheet">
 <style>
   *{ margin:0; padding:0; box-sizing:border-box; }
   body{
