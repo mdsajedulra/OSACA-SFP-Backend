@@ -39,7 +39,9 @@ const createBulkDistribution = catchAsync(async (req, res) => {
 // get all distribution
 
 const getAllDistributions = catchAsync(async (req, res) => {
-  const distributions = await distributionServices.getAllDistributions();
+  const query = req.query;
+  console.log(query)
+  const distributions = await distributionServices.getAllDistributions(query as Record<string, string>);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,

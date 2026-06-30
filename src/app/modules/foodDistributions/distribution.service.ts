@@ -15,6 +15,7 @@ import {
 } from "../../utils/challanNumber";
 import { generationBatchModel } from "../challanJob/gerationBatch.mode";
 import pdfJobModel from "../challanJob/pdfJob.model";
+import { QueryBuilder } from "../../builder/QueryBuilder";
 
 // create distribution service function
 
@@ -70,11 +71,17 @@ const createBulkDistribution = async (payload: IFoodDistribution[]) => {
 };
 // get all distribution
 
-const getAllDistributions = async () => {
-  const distributions = await FoodDistribution.find()
-    .populate("schoolId")
-    .populate("upazilaId");
-  return distributions;
+const getAllDistributions = async (query: Record<string, string>) => {
+  // const distributions = await FoodDistribution.find()
+  //   .populate("schoolId")
+  //   .populate("upazilaId");
+  // const distributions = await FoodDistribution.find()
+
+  const queryBuilder = new QueryBuilder(FoodDistribution.find(), query);
+
+  const totalDistribution = await queryBuilder.filter().modelQuery;
+
+  return totalDistribution;
 };
 
 // get distribution by id
@@ -322,14 +329,14 @@ const createAllEntry = async (selectedDates: string[], submittedBy: string) => {
 // pdf generation from here
 
 const startPdfWorker = async (batchId: string) => {
-  const result =  await pdfJobModel.create({ batchId });
+  const result = await pdfJobModel.create({ batchId });
 
   if (!result) {
     throw new Error("Failed to create PDF job");
   }
-return "pdf generation started";
+  return "pdf generation started";
 };
-  
+
 export const distributionServices = {
   createDistribution,
   createBulkDistribution,
