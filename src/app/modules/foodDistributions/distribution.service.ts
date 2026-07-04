@@ -79,7 +79,10 @@ const getAllDistributions = async (query: Record<string, string>) => {
 
   const queryBuilder = new QueryBuilder(FoodDistribution.find(), query);
 
-  const totalDistribution = await queryBuilder.filter().modelQuery;
+  const totalDistribution = await queryBuilder.filter().paginate().modelQuery
+    .populate("schoolId")
+    .populate("upazilaId");
+
 
   return totalDistribution;
 };
