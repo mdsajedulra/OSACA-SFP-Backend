@@ -1,5 +1,6 @@
 import { toBanglaNumber } from "../../utils/toBanglaNumber";
 import { challanHTML } from "../../utils/challanHTML";
+import { getBengaliFontBase64 } from "../../utils/logoandfonts";
 
 export function formatDate(date: Date): string {
   const d = date.getDate().toString().padStart(2, "0");
@@ -13,8 +14,14 @@ export function buildSingleHTML(c: any, logoBase64: string): string {
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<link href="/src/assets/NotoSerifBengali.ttf" rel="stylesheet">
+  
 <style>
+ @font-face {
+    font-family: 'Noto Serif Bengali';
+    src: url(data:font/ttf;base64,${getBengaliFontBase64()}) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
   *{ margin:0; padding:0; box-sizing:border-box; }
   body{
     font-family:'Noto Serif Bengali',serif;

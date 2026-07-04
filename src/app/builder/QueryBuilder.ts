@@ -20,10 +20,10 @@ export class QueryBuilder<T> {
     return this
   }
 // search
-search(searhableField: string[]):this{
-
+search(searchableField: string[]):this{
+  searchTerm = this.query.searchTerm || "";
   const searchQuery = {
-    $or: searhableField.map(field=>({[field]:{$regex: searchTerm, $options:"i"}}))
+    $or: searchableField.map(field=>({[field]:{$regex: searchTerm, $options:"i"}}))
   }
   return this
 }

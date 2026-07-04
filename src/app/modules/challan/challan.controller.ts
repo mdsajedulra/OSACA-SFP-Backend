@@ -1,13 +1,11 @@
 import catchAsync from "../../utils/catchAsync";
 import { formatDate } from "../../utils/formatDate";
-import { getLogoBase64 } from "../../utils/logo";
+import { getLogoBase64 } from "../../utils/logoandfonts";
 import { FoodDistribution } from "../foodDistributions/distribution.model";
 
 import puppeteer from "puppeteer-core";
 import { buildSingleHTML } from "./challan.service";
-
-const CHROME_PATH =
-  "C:/Users/mdsaj/.cache/puppeteer/chrome-headless-shell/win64-149.0.7827.22/chrome-headless-shell-win64/chrome-headless-shell.exe";
+import { launchBrowser } from "../../utils/puppeteer.browser";
 
 const getSingleChallan = catchAsync(async (req, res) => {
   const { challanNo } = req.params;
@@ -56,19 +54,13 @@ console.log(challan)
   const html = buildSingleHTML(challanData, logoBase64);
 
   // ৪. Puppeteer দিয়ে PDF বানাও
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: CHROME_PATH,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-    ],
-  });
+  const browser = await launchBrowser();
 
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "domcontentloaded" });
+    await page.evaluateHandle("document.fonts.ready");
+
     await new Promise((r) => setTimeout(r, 300));
 
     const pdfBuffer = await page.pdf({

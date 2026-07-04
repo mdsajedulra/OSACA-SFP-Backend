@@ -7,9 +7,9 @@ import { FoodDistribution } from "../foodDistributions/distribution.model";
 import { formatDate } from "../../utils/formatDate";
 import { challanHTML } from "../../utils/challanHTML";
 import { ZipArchive } from "archiver";
+import { launchBrowser } from "../../utils/puppeteer.browser";
+import { getBengaliFontBase64 } from "../../utils/logoandfonts";
 
-const CHROME_PATH =
-  "C:/Users/mdsaj/.cache/puppeteer/chrome-headless-shell/win64-149.0.7827.22/chrome-headless-shell-win64/chrome-headless-shell.exe";
 
 function getLogoBase64(): string {
   const logoPath = path.join(process.cwd(), "src/assets/osaca-logo.webp");
@@ -46,8 +46,19 @@ function buildFullHTML(challans: any[], logoBase64: string): string {
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<link href="/src/assets/NotoSerifBengali.ttf" rel="stylesheet">
+ @font-face {
+    font-family: 'Noto Serif Bengali';
+    src: url(data:font/ttf;base64,${getBengaliFontBase64()}) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
 <style>
+ @font-face {
+    font-family: 'Noto Serif Bengali';
+    src: url(data:font/ttf;base64,${getBengaliFontBase64()}) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Noto Serif Bengali',serif; background:#fff; }
 
@@ -137,6 +148,8 @@ async function generatePdfBuffer(
     await page.setContent(buildFullHTML(chunk, logoBase64), {
       waitUntil: "domcontentloaded",
     });
+    await page.evaluateHandle("document.fonts.ready");
+
     await new Promise((r) => setTimeout(r, 1500));
 
     const pdfBuffer = await page.pdf({
@@ -216,18 +229,7 @@ export async function generateAllChallansPdf(batchId: string): Promise<string> {
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
   const tmpDir = path.join(process.cwd(), `chrome-tmp-${Date.now()}`);
-  const browser = await puppeteer.launch({
-    headless: true,
-    // executablePath: CHROME_PATH,
-    args: [
-      "--no-sandbox",
-      // "--disable-setuid-sandbox",
-      // "--disable-dev-shm-usage",
-      // "--disable-extensions",
-      // "--no-first-run",
-    ],
-    // userDataDir: tmpDir,
-  });
+  const browser =await launchBrowser();
 
   try {
     for (const [upazilaName, dateMap] of upazilaMap) {
