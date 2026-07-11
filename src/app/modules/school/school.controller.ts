@@ -61,7 +61,8 @@ const schoolLogin = catchAsync(async (req, res, next) => {
 // get all school
 
 const getAllSchool = catchAsync(async (req, res, next) => {
-  const result = await schoolService.getAllSchool();
+  const query = req.query as Record<string, string>;
+  const result = await schoolService.getAllSchool(query);
   sendResponse(res, {
     message: "school get successfully",
     statusCode: StatusCodes.OK,

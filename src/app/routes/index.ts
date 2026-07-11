@@ -2,11 +2,12 @@ import { Router } from "express";
 import userRoute from "../modules/user/user.routes";
 import authrouter from "../modules/auth/auth.routes";
 import schoolRouter from "../modules/school/school.routes";
-import attendanceRoutes from "../modules/Attendance/attendance.routes";
+
 import contactInfoRouter from "../modules/contactinfo/contactInfo.routes";
 import upazilaRouter from "../modules/upazila/upazila.routes";
 import distributionRouter from "../modules/foodDistributions/distribution.routes";
 import challanRouter from "../modules/challan/challan.route";
+import reportRoutes from "../modules/report/report.routes";
 
 const router = Router();
 
@@ -38,6 +39,10 @@ const moduleRoutes = [
   {
     path: "/challan",
     route: challanRouter,
+  },
+  {
+    path: "/report",
+    route: reportRoutes,
   },
 ];
 

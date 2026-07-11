@@ -5,6 +5,7 @@ import mongoose, { Types } from "mongoose";
 import { FoodDistribution } from "../foodDistributions/distribution.model";
 import { User } from "../user/user.model";
 import { IUpazila } from "../upazila/upazila.interface";
+import { QueryBuilder } from "../../builder/QueryBuilder";
 
 const createSchool = async (payload: ISchool) => {
   const result = await schoolModel.create(payload);
@@ -28,9 +29,19 @@ const schoolLogin = async (payload: ISchoolLogin) => {
 
 // get all schools
 
-const getAllSchool = async () => {
-  const result = await schoolModel.find();
-  return result;
+const getAllSchool = async (query: Record<string, string>) => {
+
+  const queryBuilder = new QueryBuilder(schoolModel.find(), query);
+  const schools = await queryBuilder
+        .filter()
+        .paginate()
+        .search(["schoolName", "schoolCode"])
+
+  const [data, meta] = await Promise.all([
+    schools.build(),
+    queryBuilder.getMeta(),
+  ]);
+  return { data, meta };
 };
 
 // update school data

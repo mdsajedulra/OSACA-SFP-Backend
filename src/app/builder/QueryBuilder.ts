@@ -10,33 +10,53 @@ export class QueryBuilder<T> {
     this.query = query;
   }
 
-// filter
+  // filter
   filter(): any {
     const filter = { ...this.query };
     for (const field of excludeField) {
       delete filter[field];
     }
-    this.modelQuery = this.modelQuery.find(filter); // distribution.find().find(filter)
-    return this
+    this.modelQuery = this.modelQuery.find(filter); // modelname.find().find(filter)
+    return this;
   }
-// search
-search(searchableField: string[]):this{
- const searchTerm = this.query.searchTerm || "";
- console.log(searchTerm)
-  const searchQuery = {
-    $or: searchableField.map(field=>({[field]:{$regex: searchTerm, $options:"i"}}))
+  // search
+  search(searchableField: string[]): this {
+    const searchTerm = this.query.searchTerm || "";
+    console.log(searchTerm);
+    const searchQuery = {
+      $or: searchableField.map((field) => ({
+        [field]: { $regex: searchTerm, $options: "i" },
+      })),
+    };
+    this.modelQuery = this.modelQuery.find(searchQuery);
+    return this;
   }
-  this.modelQuery = this.modelQuery.find(searchQuery)
-  return this
-}
-// pagination 
-paginate(): this{
-  const page = Number(this.query.page) || 1;
-  const limit = Number(this.query.limit) || 20;
-  const skip = (page - 1) * limit;
-  this.modelQuery = this.modelQuery.skip(skip).limit(limit);
-  
-  return this
-}
+  // pagination
+  paginate(): this {
+    const page = Number(this.query.page) || 1;
+    const limit = Number(this.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    this.modelQuery = this.modelQuery.skip(skip).limit(limit);
 
+    return this;
+  }
+  build() {
+    return this.modelQuery;
+  }
+
+  async getMeta() {
+    const totalDocuments = await this.modelQuery.model.countDocuments();
+    const page = Number(this.query.page)|| 1;
+    const limit = Number(this.query.limit) || 20;
+   
+    const totalPages = Math.ceil(totalDocuments / limit);
+    return {
+      totalDocuments,
+      page,
+      limit,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    };
+  }
 }
