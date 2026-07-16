@@ -5,7 +5,7 @@ import { generationBatchModel } from "./gerationBatch.mode";
 import pdfJobModel from "./pdfJob.model";
 
 export function startPdfWorker() {
-  console.log("🔄 PDF Worker চালু");
+  // console.log("🔄 PDF Worker চালু");
 
   setInterval(async () => {
     // pending job আছে কিনা দেখো
