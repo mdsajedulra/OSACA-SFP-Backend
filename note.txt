@@ -1,0 +1,49 @@
+const OSACA_SEED: TOrganization = {
+  name: "Organization for Social Advancement and Cultural Activities",
+  nameBangla: "অর্গানাইজেশন ফর সোসাল এডভান্সমেন্ট এন্ড কালচারাল এক্টিভিটিস",
+  shortName: "OSACA",
+  shortNameBangla: "ওসাকা",
+  contactNumber: "01780941957",
+  address: "Pabna Sadar, Pabna",
+  addressBangla: "পাবনা সদর, পাবনা",
+  contractNo: "৩৮.০১.০০০০.০১২.০৭.০৭৩.২৫-২১২",
+  
+  assignedItems: [
+    {
+      itemName: "banruti",
+      itemNameBangla: "বনরুটি",
+      weight: 120,
+      weightUnit: "গ্রাম",
+      unitPrice: 22.883,
+    },
+    {
+      itemName: "boiled_egg",
+      itemNameBangla: "সিদ্ধ ডিম",
+      weight: 60,
+      weightUnit: "গ্রাম",
+      unitPrice: 13.543,
+    },
+    {
+      itemName: "banana",
+      itemNameBangla: "কলা",
+      weight: 100,
+      weightUnit: "গ্রাম",
+      unitPrice: 9.807,
+    },
+  ],
+  bankDetails: {
+    accountNameBangla:
+      "অর্গানাইজেশন ফর সোসাল এডভান্সমেন্ট এন্ড কালচারাল এক্টিভিটিস",
+    accountNameEnglish: "ORGANISATION FOR SOCIAL ADVANCEMENT & CULTURAL ACTIVITIES",
+    accountNo: "1201000134655",
+    bankName: "যমুনা ব্যাংক পিএলসি.",
+    branch: "পাবনা শাখা",
+    routingNumber: "130761785",
+  },
+  executiveDirector: {
+    nameEnglish: "Md Abdul Mazid",
+    nameBangla: "মোঃ আব্দুল মজিদ",
+    designationEnglish: "Executive Director",
+    designationBangla: "নির্বাহী পরিচালক",
+  },
+};
