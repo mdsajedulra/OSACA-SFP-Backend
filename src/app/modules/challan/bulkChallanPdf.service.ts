@@ -46,12 +46,7 @@ function buildFullHTML(challans: any[], logoBase64: string): string {
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
- @font-face {
-    font-family: 'Noto Serif Bengali';
-    src: url(data:font/ttf;base64,${getBengaliFontBase64()}) format('truetype');
-    font-weight: normal;
-    font-style: normal;
-  }
+ 
 <style>
  @font-face {
     font-family: 'Noto Serif Bengali';

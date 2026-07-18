@@ -1,16 +1,17 @@
-import { buildFullHTML } from "../../template/form4";
 import { getBdMonthRange } from "../../utils/getBDMonthRange";
 import { FoodDistribution } from "../foodDistributions/distribution.model";
-import { BN_MONTHS } from "../../constant/BN_MONTH";
-import { launchBrowser } from "../../utils/puppeteer.browser";
-import fs from "fs";
-import path from "path";
+
+import htmlToPdf from "./htmltoPdf";
+import savePdf from "./savePdf";
+import buildFullHTMLform4 from "./templates/form04.template";
 
 
-const form4Report = async (year: number, month: number) => {
-  const { start, end } = getBdMonthRange(year, month);
+const form4Report = async(year: number,month: number)=>{
 
-  const distributions = await FoodDistribution.aggregate([
+  const {start, end} = getBdMonthRange(year, month)
+  console.log(start, end)
+
+    const distributions = await FoodDistribution.aggregate([
     {
       $match: {
         date: { $gte: start, $lte: end },
@@ -32,51 +33,31 @@ const form4Report = async (year: number, month: number) => {
         as: "school",
       },
     },
-    {
-      $unwind: "$school",
-    },
-    { $sort: { "school.pdOfficeSerial": 1 } },
+    { $unwind: "$school" },
+    { $sort: { "school.name": 1 } },
+
+    // $unwind: "$school" এর পরে
+{
+  $lookup: {
+    from: "upazilas",          // তোমার upazila collection নাম
+    localField: "school.address.upazilaId",
+    foreignField: "_id",
+    as: "upazila",
+  },
+},
+{ $unwind: { path: "$upazila", preserveNullAndEmptyArrays: true } },
   ]);
 
-  if (!distributions || distributions.length === 0) {
-    throw new Error("No distributions found for the specified month and year.");
-  }
+  const html = buildFullHTMLform4(distributions, month, year)
 
-  const html = buildFullHTML(distributions, BN_MONTHS[month - 1], year);
-  const browser = await launchBrowser();
-    try {
-    const page = await browser.newPage();
-    await page.setContent(html, {
-      // use a waitUntil value compatible with the Puppeteer types
-      waitUntil: "load",
-      timeout: 300000, // 5 min
-    });
+  const pdf = await htmlToPdf(html);
+  const filepath =  savePdf(pdf, "form4")
 
-    // Response এ না পাঠিয়ে file এ save করো
-    const fileName = `form4-${year}-${month}-${Date.now()}.pdf`;
-    const outputDir = path.join(process.cwd(), "public", "reports");
+  return filepath
 
-    // folder না থাকলে বানাও
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
 
-    const filePath = path.join(outputDir, fileName);
-
-    await page.pdf({
-      path: filePath, // ← সরাসরি disk এ লেখে, memory তে রাখে না
-      format: "A4",
-      printBackground: true,
-      margin: { top: 0, bottom: 0, left: 0, right: 0 },
-    });
-
-    return { fileName, url: `/reports/${fileName}` };
-  } finally {
-    await browser.close();
-  }
-
-};
-
+}
 export const reportServices = {
   form4Report,
 };
+
