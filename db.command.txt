@@ -1,0 +1,27 @@
+//
+db.fooddistributions.updateMany(
+  {
+    schoolId: ObjectId("69ef2d1592a54e899f0baca0"),
+    date: {
+      $gte: ISODate("2026-06-30T18:00:00.000Z"),
+      $lt:  ISODate("2026-07-31T18:00:00.000Z")
+    }
+  },
+  {
+    $set: {
+      "items.$[item1].sent": 76,
+      "items.$[item1].received": 0,
+      "items.$[item2].sent": 76,
+      "items.$[item2].received": 0,
+      "items.$[item3].sent": 76,
+      "items.$[item3].received": 0
+    }
+  },
+  {
+    arrayFilters: [
+      { "item1.food": "বনরুটি" },
+      { "item2.food": "সিদ্ধ ডিম" },
+      { "item3.food": "কলা" }
+    ]
+  }
+)

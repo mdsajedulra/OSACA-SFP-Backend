@@ -86,7 +86,12 @@ const getAllDistributions = async (query: Record<string, string>) => {
 
   return totalDistribution;
 };
+// get all distribtions with no optimzaton 
 
+const getAllDistributionsNoOptimized = async ()=>{
+   const result = await FoodDistribution.find()
+   return result
+}
 // get distribution by id
 
 const getDistributionById = async (id: ObjectId) => {
@@ -344,6 +349,7 @@ export const distributionServices = {
   createDistribution,
   createBulkDistribution,
   getAllDistributions,
+  getAllDistributionsNoOptimized,
   getDistributionById,
   updateDistributionById,
   deleteDistributionById,

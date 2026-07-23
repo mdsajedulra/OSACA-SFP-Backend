@@ -43,7 +43,12 @@ const getAllSchool = async (query: Record<string, string>) => {
   ]);
   return { data, meta };
 };
+// get school not optimized 
 
+const getAllSchoolNotOptimized = async ()=>{
+  const schools = schoolModel.find();
+  return schools
+}
 // update school data
 
 const updateSchool = async (id: ObjectId, payload: Partial<ISchool>) => {
@@ -117,6 +122,7 @@ export const schoolService = {
   createSchool,
   schoolLogin,
   getAllSchool,
+  getAllSchoolNotOptimized,
   updateSchool,
   bulkSchool,
   getSchoolForBranchManager,

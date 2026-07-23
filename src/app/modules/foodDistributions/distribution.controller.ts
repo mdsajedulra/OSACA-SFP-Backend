@@ -3,13 +3,7 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { distributionServices } from "./distribution.service";
 import { ObjectId } from "mongodb";
-import { get, Types } from "mongoose";
-
-// import { generatePDF } from "../../utils/pdfGenerator";
-import schoolModel from "../school/school.model";
-import { generateDocx } from "../../utils/docxGenerator";
-import { populate } from "dotenv";
-import { startPdfWorker } from "../challanJob/pdfWorker";
+import { Types } from "mongoose";
 import { User } from "../user/user.model";
 
 const createDistribution = catchAsync(async (req, res) => {
@@ -49,7 +43,18 @@ const getAllDistributions = catchAsync(async (req, res) => {
     data: distributions,
   });
 });
-
+// no optimzed get all distribution 
+const getAllDistributionsNoOptimized = catchAsync(async (req, res) => {
+  // const query = req.query;
+  // console.log(query)
+  const distributions = await distributionServices.getAllDistributionsNoOptimized();
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Food distributions retrieved successfully",
+    data: distributions,
+  });
+});
 // get distribution by id
 
 const getDistributionById = catchAsync(async (req, res) => {
@@ -211,6 +216,7 @@ export const distributionController = {
   createBulkDistribution,
   getDistributionById,
   getAllDistributions,
+  getAllDistributionsNoOptimized,
   updateDistributionById,
   deleteDistributionById,
   // get distribution for branch manager

@@ -71,6 +71,17 @@ const getAllSchool = catchAsync(async (req, res, next) => {
   });
 });
 
+// get all school not optimized 
+
+const getAllSchoolNotOptimized = catchAsync(async (req, res, next) => {
+  const result = await schoolService.getAllSchoolNotOptimized();
+  sendResponse(res, {
+    message: "school get successfully",
+    statusCode: StatusCodes.OK,
+    success: true,
+    data: result,
+  });
+});
 // update school
 const updateSchool = catchAsync(async (req, res, next) => {
   const id = req.params.id as unknown as ObjectId;
@@ -227,6 +238,7 @@ export const schoolController = {
   createSchool,
   schoolLogin,
   getAllSchool,
+  getAllSchoolNotOptimized,
   updateSchool,
   bulkSchool,
   bulkSchoolUpdate,

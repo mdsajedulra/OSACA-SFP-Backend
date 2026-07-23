@@ -7,7 +7,9 @@ const distributionRouter = Router();
 distributionRouter.post("/",  distributionController.createDistribution)
 distributionRouter.post("/bulk",  distributionController.createBulkDistribution)
 
+distributionRouter.get("/no-optimized", distributionController.getAllDistributionsNoOptimized)
 distributionRouter.get("/", distributionController.getAllDistributions)
+
 distributionRouter.get("/school/:id", distributionController.getDistributionBySchoolIdLast)
 distributionRouter.get("/school/report/:schoolId", distributionController.getSchoolDistributionReport)
 
