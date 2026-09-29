@@ -89,7 +89,8 @@ const getAllDistributions = async (query: Record<string, string>) => {
 // get all distribtions with no optimzaton 
 
 const getAllDistributionsNoOptimized = async ()=>{
-   const result = await FoodDistribution.find()
+   const result = await FoodDistribution.find().populate("schoolId")
+    .populate("upazilaId");
    return result
 }
 // get distribution by id
