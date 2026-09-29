@@ -2,13 +2,16 @@ import puppeteer, { Browser } from "puppeteer-core";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
 
-const resolveChromePath = (): string => {
-  // ১. Env variable সবচেয়ে priority পাবে (VPS-এ এটা set করবে)
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+const resolveChromePath = (): string | null => {
+  // 1. Environment variable
+  if (
+    process.env.PUPPETEER_EXECUTABLE_PATH &&
+    existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)
+  ) {
     return process.env.PUPPETEER_EXECUTABLE_PATH;
   }
 
-  // ২. Puppeteer-এর নিজের install করা browser খোঁজো (Mac/Windows/Linux সব জায়গায় কাজ করে)
+  // 2. Puppeteer browser
   try {
     const path = execSync(
       "npx puppeteer browsers list chrome-headless-shell",
@@ -18,32 +21,51 @@ const resolveChromePath = (): string => {
       .find((line) => line.includes("chrome-headless-shell"))
       ?.split(" ")
       .pop();
-    if (path && existsSync(path)) return path;
+
+    if (path && existsSync(path)) {
+      return path;
+    }
   } catch {
-    // ignore, fallback-এ যাও
+    // Puppeteer/Chrome not available
   }
 
-  // ৩. System Chrome fallback (platform অনুযায়ী)
+  // 3. System Chrome
   const candidates =
     process.platform === "darwin"
       ? ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
       : process.platform === "linux"
-        ? ["/usr/bin/google-chrome-stable", "/usr/bin/google-chrome", "/usr/bin/chromium-browser", "/usr/bin/chromium"]
+        ? [
+            "/usr/bin/google-chrome-stable",
+            "/usr/bin/google-chrome",
+            "/usr/bin/chromium-browser",
+            "/usr/bin/chromium",
+          ]
         : ["C:/Program Files/Google/Chrome/Application/chrome.exe"];
 
   const found = candidates.find((p) => existsSync(p));
-  if (found) return found;
 
-  throw new Error(
-    "Chrome not found. Run: npx puppeteer browsers install chrome-headless-shell"
+  if (found) {
+    return found;
+  }
+
+  // Chrome না থাকলেও server crash করবে না
+  console.warn(
+    "⚠️ Chrome not found. Puppeteer features are disabled."
   );
+
+  return null;
 };
 
-// Path একবারই resolve হবে, প্রতি request-এ না
 const CHROME_PATH = resolveChromePath();
 
-export const launchBrowser = (): Promise<Browser> =>
-  puppeteer.launch({
+export const launchBrowser = async (): Promise<Browser> => {
+  if (!CHROME_PATH) {
+    throw new Error(
+      "PDF/browser feature is not available on this server because Chrome is not installed."
+    );
+  }
+
+  return puppeteer.launch({
     headless: true,
     executablePath: CHROME_PATH,
     args: [
@@ -53,3 +75,4 @@ export const launchBrowser = (): Promise<Browser> =>
       "--disable-gpu",
     ],
   });
+};
