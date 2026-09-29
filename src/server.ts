@@ -9,6 +9,7 @@ async function server() {
   try {
     await mongoose.connect(config.database_url as string);
     startPdfWorker();
+    console.log("Database:", mongoose.connection.name);
 
     const port = process.env.PORT || config.port || 3000;
 

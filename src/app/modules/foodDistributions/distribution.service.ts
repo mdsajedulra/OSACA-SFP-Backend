@@ -3,7 +3,7 @@ import schoolModel from "../school/school.model";
 import { IFoodDistribution } from "./distribution.interface";
 import { FoodDistribution } from "./distribution.model";
 import { User } from "../user/user.model";
-import mongoose, { get, Types } from "mongoose";
+import  { Types } from "mongoose";
 import moment from "moment-timezone";
 import {
   exportSchoolDistributionMonthlyReport,
@@ -204,9 +204,9 @@ const exportSchoolDistributionMonthlyReportService = async (
 /// creata all entry and generate pdf from here
 
 const MENU: Record<number, string[]> = {
-  0: ["bread", "egg"], // রবিবার   → বনরুটি + সিদ্ধ ডিম
+  0: ["banana"], // রবিবার   → বনরুটি + সিদ্ধ ডিম
   1: ["bread"], // সোমবার   → বনরুটি
-  2: ["banana"], // মঙ্গলবার → কলা
+  2: ["bread", "egg"], // মঙ্গলবার → কলা
   3: ["bread", "egg"], // বুধবার   → বনরুটি + সিদ্ধ ডিম
   4: ["bread", "egg"], // বৃহস্পতি → বনরুটি + সিদ্ধ ডিম
   5: [], // শুক্রবার → অফ

@@ -205,7 +205,7 @@ const bulkSchoolUpdate = catchAsync(async (req, res) => {
 
   const schools = data.map((row) => ({
     // schoolName: row.schoolName,
-    // defaultItems: Number(row.defaultItems) || 0,
+    defaultItems: Number(row.defaultItems) || 0,
     // schoolNameBangla: row.schoolNameBangla,
     schoolCode: row.schoolCode,
     // password: row.password,
@@ -213,7 +213,7 @@ const bulkSchoolUpdate = catchAsync(async (req, res) => {
     // headTeacherName: row.headTeacherName,
     // tifinManager: row.tifinManager || "",
     // tifinManagerPNumber: row.tifinManagerNumber || "",
-    totalStudent: Number(row.totalStudent),
+    // totalStudent: Number(row.totalStudent),
     // defaultItems: Number(row.defaultItem) || 0,
     // address: {
     //   upazilaId:  row.upazilaId,
