@@ -11,6 +11,7 @@ const contactInfo_routes_1 = __importDefault(require("../modules/contactinfo/con
 const upazila_routes_1 = __importDefault(require("../modules/upazila/upazila.routes"));
 const distribution_routes_1 = __importDefault(require("../modules/foodDistributions/distribution.routes"));
 const challan_route_1 = __importDefault(require("../modules/challan/challan.route"));
+const report_routes_1 = __importDefault(require("../modules/report/report.routes"));
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -40,6 +41,10 @@ const moduleRoutes = [
     {
         path: "/challan",
         route: challan_route_1.default,
+    },
+    {
+        path: "/report",
+        route: report_routes_1.default,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

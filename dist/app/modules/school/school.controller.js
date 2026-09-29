@@ -43,7 +43,18 @@ const schoolLogin = (0, catchAsync_1.default)((req, res, next) => __awaiter(void
 }));
 // get all school
 const getAllSchool = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield school_service_1.schoolService.getAllSchool();
+    const query = req.query;
+    const result = yield school_service_1.schoolService.getAllSchool(query);
+    (0, sendResponse_1.default)(res, {
+        message: "school get successfully",
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        success: true,
+        data: result,
+    });
+}));
+// get all school not optimized 
+const getAllSchoolNotOptimized = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield school_service_1.schoolService.getAllSchoolNotOptimized();
     (0, sendResponse_1.default)(res, {
         message: "school get successfully",
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -146,7 +157,7 @@ const bulkSchoolUpdate = (0, catchAsync_1.default)((req, res) => __awaiter(void 
     const data = xlsx_1.default.utils.sheet_to_json(sheet);
     const schools = data.map((row) => ({
         // schoolName: row.schoolName,
-        // defaultItems: Number(row.defaultItems) || 0,
+        defaultItems: Number(row.defaultItems) || 0,
         // schoolNameBangla: row.schoolNameBangla,
         schoolCode: row.schoolCode,
         // password: row.password,
@@ -154,7 +165,7 @@ const bulkSchoolUpdate = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         // headTeacherName: row.headTeacherName,
         // tifinManager: row.tifinManager || "",
         // tifinManagerPNumber: row.tifinManagerNumber || "",
-        totalStudent: Number(row.totalStudent),
+        // totalStudent: Number(row.totalStudent),
         // defaultItems: Number(row.defaultItem) || 0,
         // address: {
         //   upazilaId:  row.upazilaId,
@@ -176,6 +187,7 @@ exports.schoolController = {
     createSchool,
     schoolLogin,
     getAllSchool,
+    getAllSchoolNotOptimized,
     updateSchool,
     bulkSchool,
     bulkSchoolUpdate,

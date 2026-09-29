@@ -16,6 +16,7 @@ exports.schoolService = void 0;
 const school_model_1 = __importDefault(require("./school.model"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const user_model_1 = require("../user/user.model");
+const QueryBuilder_1 = require("../../builder/QueryBuilder");
 const createSchool = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield school_model_1.default.create(payload);
     return result;
@@ -35,9 +36,22 @@ const schoolLogin = (payload) => __awaiter(void 0, void 0, void 0, function* () 
     return school[0];
 });
 // get all schools
-const getAllSchool = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield school_model_1.default.find();
-    return result;
+const getAllSchool = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const queryBuilder = new QueryBuilder_1.QueryBuilder(school_model_1.default.find(), query);
+    const schools = yield queryBuilder
+        .filter()
+        .paginate()
+        .search(["schoolName", "schoolCode"]);
+    const [data, meta] = yield Promise.all([
+        schools.build(),
+        queryBuilder.getMeta(),
+    ]);
+    return { data, meta };
+});
+// get school not optimized 
+const getAllSchoolNotOptimized = () => __awaiter(void 0, void 0, void 0, function* () {
+    const schools = school_model_1.default.find();
+    return schools;
 });
 // update school data
 const updateSchool = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -89,6 +103,7 @@ exports.schoolService = {
     createSchool,
     schoolLogin,
     getAllSchool,
+    getAllSchoolNotOptimized,
     updateSchool,
     bulkSchool,
     getSchoolForBranchManager,

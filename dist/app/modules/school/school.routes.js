@@ -13,6 +13,7 @@ schoolRouter.post("/", school_controller_1.schoolController.createSchool);
 schoolRouter.post("/bulk", upload.single("file"), school_controller_1.schoolController.bulkSchool);
 schoolRouter.patch("/bulk", upload.single("file"), school_controller_1.schoolController.bulkSchoolUpdate);
 schoolRouter.get("/", school_controller_1.schoolController.getAllSchool);
+schoolRouter.get("/", school_controller_1.schoolController.getAllSchoolNotOptimized);
 schoolRouter.get("/:schoolId", school_controller_1.schoolController.getSchoolById);
 schoolRouter.patch("/:id", school_controller_1.schoolController.updateSchool);
 schoolRouter.delete("/:id", school_controller_1.schoolController.deleteSchool);

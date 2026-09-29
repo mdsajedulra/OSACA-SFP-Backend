@@ -4,6 +4,7 @@ exports.formatDate = formatDate;
 exports.buildSingleHTML = buildSingleHTML;
 const toBanglaNumber_1 = require("../../utils/toBanglaNumber");
 const challanHTML_1 = require("../../utils/challanHTML");
+const logoandfonts_1 = require("../../utils/logoandfonts");
 function formatDate(date) {
     const d = date.getDate().toString().padStart(2, "0");
     const m = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -15,8 +16,14 @@ function buildSingleHTML(c, logoBase64) {
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+  
 <style>
+ @font-face {
+    font-family: 'Noto Serif Bengali';
+    src: url(data:font/ttf;base64,${(0, logoandfonts_1.getBengaliFontBase64)()}) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
   *{ margin:0; padding:0; box-sizing:border-box; }
   body{
     font-family:'Noto Serif Bengali',serif;

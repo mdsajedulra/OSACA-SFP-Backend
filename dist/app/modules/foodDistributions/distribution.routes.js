@@ -9,6 +9,7 @@ const auth_1 = __importDefault(require("../../middlewares/auth"));
 const distributionRouter = (0, express_1.Router)();
 distributionRouter.post("/", distribution_controller_1.distributionController.createDistribution);
 distributionRouter.post("/bulk", distribution_controller_1.distributionController.createBulkDistribution);
+distributionRouter.get("/no-optimized", distribution_controller_1.distributionController.getAllDistributionsNoOptimized);
 distributionRouter.get("/", distribution_controller_1.distributionController.getAllDistributions);
 distributionRouter.get("/school/:id", distribution_controller_1.distributionController.getDistributionBySchoolIdLast);
 distributionRouter.get("/school/report/:schoolId", distribution_controller_1.distributionController.getSchoolDistributionReport);

@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateAllChallansPdf = generateAllChallansPdf;
-const puppeteer_1 = __importDefault(require("puppeteer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const pdf_lib_1 = require("pdf-lib");
@@ -21,7 +20,8 @@ const distribution_model_1 = require("../foodDistributions/distribution.model");
 const formatDate_1 = require("../../utils/formatDate");
 const challanHTML_1 = require("../../utils/challanHTML");
 const archiver_1 = require("archiver");
-const CHROME_PATH = "C:/Users/mdsaj/.cache/puppeteer/chrome-headless-shell/win64-149.0.7827.22/chrome-headless-shell-win64/chrome-headless-shell.exe";
+const puppeteer_browser_1 = require("../../utils/puppeteer.browser");
+const logoandfonts_1 = require("../../utils/logoandfonts");
 function getLogoBase64() {
     const logoPath = path_1.default.join(process.cwd(), "src/assets/osaca-logo.webp");
     if (fs_1.default.existsSync(logoPath)) {
@@ -52,8 +52,14 @@ function buildFullHTML(challans, logoBase64) {
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+ 
 <style>
+ @font-face {
+    font-family: 'Noto Serif Bengali';
+    src: url(data:font/ttf;base64,${(0, logoandfonts_1.getBengaliFontBase64)()}) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Noto Serif Bengali',serif; background:#fff; }
 
@@ -137,6 +143,7 @@ function generatePdfBuffer(challans, browser, logoBase64) {
             yield page.setContent(buildFullHTML(chunk, logoBase64), {
                 waitUntil: "domcontentloaded",
             });
+            yield page.evaluateHandle("document.fonts.ready");
             yield new Promise((r) => setTimeout(r, 1500));
             const pdfBuffer = yield page.pdf({
                 width: "10in",
@@ -206,18 +213,7 @@ function generateAllChallansPdf(batchId) {
         if (!fs_1.default.existsSync(outputDir))
             fs_1.default.mkdirSync(outputDir, { recursive: true });
         const tmpDir = path_1.default.join(process.cwd(), `chrome-tmp-${Date.now()}`);
-        const browser = yield puppeteer_1.default.launch({
-            headless: true,
-            // executablePath: CHROME_PATH,
-            args: [
-                "--no-sandbox",
-                // "--disable-setuid-sandbox",
-                // "--disable-dev-shm-usage",
-                // "--disable-extensions",
-                // "--no-first-run",
-            ],
-            // userDataDir: tmpDir,
-        });
+        const browser = yield (0, puppeteer_browser_1.launchBrowser)();
         try {
             for (const [upazilaName, dateMap] of upazilaMap) {
                 console.log(`📁 উপজেলা: ${upazilaName}`);

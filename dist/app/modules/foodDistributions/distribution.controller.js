@@ -40,7 +40,21 @@ const createBulkDistribution = (0, catchAsync_1.default)((req, res) => __awaiter
 }));
 // get all distribution
 const getAllDistributions = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const distributions = yield distribution_service_1.distributionServices.getAllDistributions();
+    const query = req.query;
+    // console.log(query)
+    const distributions = yield distribution_service_1.distributionServices.getAllDistributions(query);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        message: "Food distributions retrieved successfully",
+        data: distributions,
+    });
+}));
+// no optimzed get all distribution 
+const getAllDistributionsNoOptimized = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // const query = req.query;
+    // console.log(query)
+    const distributions = yield distribution_service_1.distributionServices.getAllDistributionsNoOptimized();
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -164,6 +178,7 @@ exports.distributionController = {
     createBulkDistribution,
     getDistributionById,
     getAllDistributions,
+    getAllDistributionsNoOptimized,
     updateDistributionById,
     deleteDistributionById,
     // get distribution for branch manager

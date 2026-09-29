@@ -17,12 +17,13 @@ const app_1 = __importDefault(require("./app"));
 const config_1 = __importDefault(require("./app/config"));
 const pdfWorker_1 = require("./app/modules/challanJob/pdfWorker");
 const dns_1 = __importDefault(require("dns"));
-dns_1.default.setServers(["8.8.8.8", "8.8.4.4"]);
+dns_1.default.setServers(["8.8.8.8", "1.1.1.1"]);
 function server() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield mongoose_1.default.connect(config_1.default.database_url);
             (0, pdfWorker_1.startPdfWorker)();
+            console.log("Database:", mongoose_1.default.connection.name);
             const port = process.env.PORT || config_1.default.port || 3000;
             app_1.default.listen(Number(port), () => {
                 console.log(`Server running on port ${port}`);

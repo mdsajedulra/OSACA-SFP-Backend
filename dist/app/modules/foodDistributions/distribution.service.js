@@ -22,6 +22,7 @@ const distribution_report_1 = require("./distribution.report");
 const challanNumber_1 = require("../../utils/challanNumber");
 const gerationBatch_mode_1 = require("../challanJob/gerationBatch.mode");
 const pdfJob_model_1 = __importDefault(require("../challanJob/pdfJob.model"));
+const QueryBuilder_1 = require("../../builder/QueryBuilder");
 // create distribution service function
 const createDistribution = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const school = yield school_model_1.default.findById(payload.schoolId);
@@ -60,11 +61,21 @@ const createBulkDistribution = (payload) => __awaiter(void 0, void 0, void 0, fu
     return createdDistributions;
 });
 // get all distribution
-const getAllDistributions = () => __awaiter(void 0, void 0, void 0, function* () {
-    const distributions = yield distribution_model_1.FoodDistribution.find()
+const getAllDistributions = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    // const distributions = await FoodDistribution.find()
+    //   .populate("schoolId")
+    //   .populate("upazilaId");
+    // const distributions = await FoodDistribution.find()
+    const queryBuilder = new QueryBuilder_1.QueryBuilder(distribution_model_1.FoodDistribution.find(), query);
+    const totalDistribution = yield queryBuilder.filter().paginate().modelQuery
         .populate("schoolId")
         .populate("upazilaId");
-    return distributions;
+    return totalDistribution;
+});
+// get all distribtions with no optimzaton 
+const getAllDistributionsNoOptimized = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield distribution_model_1.FoodDistribution.find();
+    return result;
 });
 // get distribution by id
 const getDistributionById = (id) => __awaiter(void 0, void 0, void 0, function* () {
@@ -137,9 +148,9 @@ const exportSchoolDistributionMonthlyReportService = (payload, format, period) =
 });
 /// creata all entry and generate pdf from here
 const MENU = {
-    0: ["bread", "egg"], // রবিবার   → বনরুটি + সিদ্ধ ডিম
+    0: ["banana"], // রবিবার   → বনরুটি + সিদ্ধ ডিম
     1: ["bread"], // সোমবার   → বনরুটি
-    2: ["banana"], // মঙ্গলবার → কলা
+    2: ["bread", "egg"], // মঙ্গলবার → কলা
     3: ["bread", "egg"], // বুধবার   → বনরুটি + সিদ্ধ ডিম
     4: ["bread", "egg"], // বৃহস্পতি → বনরুটি + সিদ্ধ ডিম
     5: [], // শুক্রবার → অফ
@@ -257,6 +268,7 @@ exports.distributionServices = {
     createDistribution,
     createBulkDistribution,
     getAllDistributions,
+    getAllDistributionsNoOptimized,
     getDistributionById,
     updateDistributionById,
     deleteDistributionById,

@@ -15,11 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.challanController = void 0;
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const formatDate_1 = require("../../utils/formatDate");
-const logo_1 = require("../../utils/logo");
+const logoandfonts_1 = require("../../utils/logoandfonts");
 const distribution_model_1 = require("../foodDistributions/distribution.model");
-const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
 const challan_service_1 = require("./challan.service");
-const CHROME_PATH = "C:/Users/mdsaj/.cache/puppeteer/chrome-headless-shell/win64-149.0.7827.22/chrome-headless-shell-win64/chrome-headless-shell.exe";
+const puppeteer_browser_1 = require("../../utils/puppeteer.browser");
 const getSingleChallan = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     const { challanNo } = req.params;
@@ -32,6 +31,7 @@ const getSingleChallan = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         populate: { path: "address.upazilaId", model: "Upazila" },
     })
         .lean();
+    console.log(challan);
     if (!challan) {
         return res.status(404).json({ message: "Challan not found" });
     }
@@ -58,21 +58,14 @@ const getSingleChallan = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         concernedOfficerDesignation: (_p = upazila === null || upazila === void 0 ? void 0 : upazila.concernedOfficerDesignation) !== null && _p !== void 0 ? _p : "",
     };
     // ৩. HTML বানাও
-    const logoBase64 = (0, logo_1.getLogoBase64)();
+    const logoBase64 = (0, logoandfonts_1.getLogoBase64)();
     const html = (0, challan_service_1.buildSingleHTML)(challanData, logoBase64);
     // ৪. Puppeteer দিয়ে PDF বানাও
-    const browser = yield puppeteer_core_1.default.launch({
-        headless: true,
-        executablePath: CHROME_PATH,
-        args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-        ],
-    });
+    const browser = yield (0, puppeteer_browser_1.launchBrowser)();
     try {
         const page = yield browser.newPage();
         yield page.setContent(html, { waitUntil: "domcontentloaded" });
+        yield page.evaluateHandle("document.fonts.ready");
         yield new Promise((r) => setTimeout(r, 300));
         const pdfBuffer = yield page.pdf({
             width: "10in",
